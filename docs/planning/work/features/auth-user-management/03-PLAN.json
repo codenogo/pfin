@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "feature": "auth-user-management",
+  "planNumber": 3,
+  "goal": "Implement HTTP handlers (auth routes + user profile), JWT auth middleware, rate limiting on auth endpoints, and wire Identity context into cmd/api/main.go router.",
+  "tasks": [
+    {
+      "id": 0,
+      "name": "JWT auth middleware",
+      "action": "Implement JWT validation middleware in internal/common/auth/. Extracts Bearer token from Authorization header, validates JWT, injects UserID + Email into request context. Reusable by all bounded contexts.",
+      "files": [
+        "internal/common/auth/middleware.go",
+        "internal/common/auth/middleware_test.go",
+        "internal/common/auth/context.go"
+      ],
+      "verify": [
+        "go test ./internal/common/auth/... -v"
+      ],
+      "microSteps": [
+        "Implement context.go: UserContext struct (UserID uuid.UUID, Email string). ContextKey type. UserFromContext(ctx) (*UserContext, error). ContextWithUser(ctx, *UserContext) context.Context",
+        "Implement middleware.go: JWTMiddleware(tokenValidator) func(http.Handler) http.Handler — extracts Bearer token, validates, injects UserContext into context. Returns 401 JSON for missing/invalid tokens.",
+        "Write middleware_test.go: test valid token → context populated, missing header → 401, invalid token → 401, expired token → 401"
+      ],
+      "tdd": {
+        "required": true,
+        "failingFirst": "go test ./internal/common/auth/... should fail",
+        "passingAfter": "go test ./internal/common/auth/... -v should pass"
+      },
+      "blockedBy": []
+    },
+    {
+      "id": 1,
+      "name": "HTTP handlers (auth + profile)",
+      "action": "Implement HTTP handlers in internal/identity/ports/. Auth handlers: register, login, refresh (cookie-based), logout. User handlers: get profile, update profile. Rate limiting on auth endpoints.",
+      "files": [
+        "internal/identity/ports/auth_handler.go",
+        "internal/identity/ports/auth_handler_test.go",
+        "internal/identity/ports/user_handler.go",
+        "internal/identity/ports/user_handler_test.go"
+      ],
+      "verify": [
+        "go test ./internal/identity/ports/... -v"
+      ],
+      "microSteps": [
+        "Implement auth_handler.go: AuthHandler struct with app command handlers. Routes() chi.Router returning mounted routes. POST /auth/register — parse JSON body, call RegisterHandler, return 201 + access token + set refresh cookie. POST /auth/login — parse body, call AuthenticateHandler, return access token + set refresh cookie. POST /auth/refresh — read refresh token from cookie, call RefreshHandler, return new access token + rotate cookie. POST /auth/logout — read cookie, call LogoutHandler, clear cookie.",
+        "Write auth_handler_test.go: test register (201 + cookie set), login (200 + cookie), refresh (200 + new cookie), logout (200 + cookie cleared). Use httptest.",
+        "Implement user_handler.go: UserHandler struct. Routes() chi.Router. GET /users/me — extract UserContext from JWT middleware, return user profile. PATCH /users/me — update display name.",
+        "Write user_handler_test.go: test get profile with valid context, update profile, missing auth → 401"
+      ],
+      "tdd": {
+        "required": true,
+        "failingFirst": "go test ./internal/identity/ports/... should fail",
+        "passingAfter": "go test ./internal/identity/ports/... -v should pass"
+      },
+      "blockedBy": [0]
+    },
+    {
+      "id": 2,
+      "name": "Wire into main.go router",
+      "action": "Update cmd/api/main.go to create the Identity application and mount auth + user routes on the chi router. Add JWT middleware to protected routes group.",
+      "files": [
+        "cmd/api/main.go"
+      ],
+      "verify": [
+        "go build -o bin/pfin ./cmd/api/...",
+        "go vet ./..."
+      ],
+      "microSteps": [
+        "Update main.go: create identity.NewApplication(pool, publisher, cfg.JWTSecret, 15*time.Minute, 14*24*time.Hour). Create AuthHandler and UserHandler. Mount /auth/* routes (public, rate-limited). Mount /users/* routes (protected by JWT middleware). Add rate limiting middleware to auth routes group.",
+        "Verify build succeeds and go vet passes"
+      ],
+      "tdd": {
+        "required": false,
+        "reason": "Wiring code. Verified by compilation."
+      },
+      "blockedBy": [1]
+    }
+  ],
+  "planVerify": [
+    "go test ./internal/identity/... -v",
+    "go test ./internal/common/auth/... -v",
+    "go build -o bin/pfin ./cmd/api/...",
+    "go vet ./..."
+  ],
+  "commitMessage": "feat(identity): HTTP handlers, JWT middleware, rate limiting, router integration",
+  "timestamp": "2026-03-20T00:00:00Z"
+}

@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "feature": "auth-user-management",
+  "displayName": "Auth & User Management (Identity Context)",
+  "parentShape": {
+    "path": "docs/planning/work/ideas/personal-finance/SHAPE.json",
+    "timestamp": "2026-03-20T00:00:00Z",
+    "schemaVersion": 1
+  },
+  "featureStub": {
+    "path": "docs/planning/work/features/auth-user-management/FEATURE.json",
+    "timestamp": "2026-03-20T00:00:00Z",
+    "schemaVersion": 1
+  },
+  "decisions": [
+    {
+      "id": "AUTH-001",
+      "title": "Auth approach",
+      "decision": "Custom Go auth (JWT + bcrypt + refresh tokens). No Keycloak/SuperTokens for v1.",
+      "rationale": "Keycloak is 1.5GB Java for email+password only. Custom Go is ~500 lines. Clean port boundary in internal/identity/ enables migration to Keycloak/SuperTokens when OAuth/MFA needed."
+    },
+    {
+      "id": "AUTH-002",
+      "title": "Access token lifetime",
+      "decision": "15 minutes",
+      "rationale": "RFC 9700 recommendation for financial apps. Short window limits damage from stolen token."
+    },
+    {
+      "id": "AUTH-003",
+      "title": "Refresh token lifetime",
+      "decision": "14 days with single-use rotation. Absolute session limit 90 days.",
+      "rationale": "Enables 'always logged in' UX. Token rotation detects theft via reuse detection. 90-day absolute limit forces periodic re-auth."
+    },
+    {
+      "id": "AUTH-004",
+      "title": "Refresh token storage (server)",
+      "decision": "PostgreSQL refresh_tokens table with hashed tokens. Supports revocation per-token and per-user.",
+      "rationale": "Matches existing stack. Enables logout-all-devices. No Redis needed at pfin's scale."
+    },
+    {
+      "id": "AUTH-005",
+      "title": "Token storage (client)",
+      "decision": "Access token in memory (React state). Refresh token in httpOnly/Secure/SameSite=Strict cookie.",
+      "rationale": "XSS-safe — JavaScript cannot access refresh token. Access token never in localStorage."
+    },
+    {
+      "id": "AUTH-006",
+      "title": "Silent refresh",
+      "decision": "Frontend Axios interceptor detects 401, calls /auth/refresh, retries original request transparently.",
+      "rationale": "User never sees login screen within the 14-day refresh window. Standard pattern used by Spotify, Netflix."
+    },
+    {
+      "id": "AUTH-007",
+      "title": "Password requirements",
+      "decision": "Minimum 8 characters + at least one uppercase, one lowercase, one number, one special character.",
+      "rationale": "User preference for complexity rules despite NIST 800-63B recommending length-only."
+    },
+    {
+      "id": "AUTH-008",
+      "title": "Email verification",
+      "decision": "Skipped for v1. All signups immediately active.",
+      "rationale": "Simplifies v1. Add email verification when Resend integration is built (budget alerts feature)."
+    },
+    {
+      "id": "AUTH-009",
+      "title": "OAuth/social login",
+      "decision": "Skipped for v1. Email+password only.",
+      "rationale": "Ship faster. Clean port boundary enables adding OAuth providers later."
+    },
+    {
+      "id": "AUTH-010",
+      "title": "Password hashing",
+      "decision": "bcrypt with default cost=10",
+      "rationale": "Slow by design, includes salt. Industry standard. golang.org/x/crypto/bcrypt."
+    },
+    {
+      "id": "AUTH-011",
+      "title": "JWT signing",
+      "decision": "HS256 (HMAC-SHA256) with shared secret from env var JWT_SECRET",
+      "rationale": "Simplest for single-service architecture. Upgrade to RS256 if service count grows."
+    }
+  ],
+  "constraints": [
+    "internal/identity/ must not import from other bounded contexts (only pkg/ shared kernel)",
+    "JWT middleware lives in internal/common/auth/ — shared across all contexts",
+    "Refresh tokens must be hashed before storage (never store raw tokens)",
+    "All auth endpoints must be rate-limited",
+    "Password validation happens in domain layer, not handlers"
+  ],
+  "openQuestions": [],
+  "relatedCode": [
+    "internal/common/auth/.gitkeep",
+    "internal/identity/domain/.gitkeep",
+    "internal/config/config.go",
+    "pkg/errs/errors.go"
+  ],
+  "research": [
+    {
+      "slug": "auth-patterns-research",
+      "path": "inline (agent research, not persisted as file)",
+      "relevance": "Modern auth patterns (Uber/Spotify/Netflix), Keycloak vs custom vs SuperTokens vs Ory Kratos. Recommends custom Go auth for v1."
+    }
+  ],
+  "shapeFeedback": [
+    {
+      "summary": "Identity context confirmed as replaceable generic subdomain — clean port boundary enables migration to Keycloak/SuperTokens when OAuth/MFA needed",
+      "affectedFeatures": ["auth-user-management"],
+      "suggestedAction": "No shape change needed — already aligned"
+    }
+  ],
+  "timestamp": "2026-03-20T00:00:00Z"
+}

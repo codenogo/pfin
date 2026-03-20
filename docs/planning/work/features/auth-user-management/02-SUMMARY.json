@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "feature": "auth-user-management",
+  "planNumber": 2,
+  "outcome": "complete",
+  "changes": [
+    "internal/identity/adapters/jwt_issuer.go — HS256 JWT sign/validate with tests",
+    "internal/identity/adapters/postgres_user_repo.go — pgx user repository",
+    "internal/identity/adapters/postgres_session_repo.go — pgx session repository",
+    "internal/identity/app/command/ — Register, Authenticate, Refresh, Logout handlers with tests",
+    "internal/identity/domain/user/events.go — UserRegistered domain event",
+    "internal/identity/service/wire.go — Application wiring"
+  ],
+  "verification": [
+    {"command": "go test ./internal/identity/adapters/... -v", "result": "pass"},
+    {"command": "go test ./internal/identity/app/command/... -v", "result": "pass"},
+    {"command": "go build ./internal/identity/...", "result": "pass"}
+  ],
+  "commit": "4baf444",
+  "timestamp": "2026-03-20T00:00:00Z"
+}

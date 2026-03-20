@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "feature": "auth-user-management",
+  "planNumber": 1,
+  "goal": "Implement the Identity domain layer: User aggregate with password validation, Credentials value object with bcrypt hashing, RefreshToken entity, repository interfaces, and database migrations for users + refresh_tokens tables.",
+  "tasks": [
+    {
+      "id": 0,
+      "name": "User aggregate + Credentials value object",
+      "action": "Implement the User entity and Credentials value object in internal/identity/domain/user/. User has ID, Email, DisplayName, PasswordHash, CreatedAt, UpdatedAt. Credentials handles password validation (8+ chars, uppercase, lowercase, number, special char) and bcrypt hashing/verification. UserRepository interface.",
+      "files": [
+        "internal/identity/domain/user/user.go",
+        "internal/identity/domain/user/user_test.go",
+        "internal/identity/domain/user/credentials.go",
+        "internal/identity/domain/user/credentials_test.go",
+        "internal/identity/domain/user/repository.go"
+      ],
+      "verify": [
+        "go test ./internal/identity/domain/user/... -v"
+      ],
+      "microSteps": [
+        "Implement user.go: User struct (ID uuid.UUID, Email string, PasswordHash string, DisplayName string, CreatedAt time.Time, UpdatedAt time.Time), NewUser constructor validating email + display name",
+        "Implement credentials.go: ValidatePassword(plain string) error enforcing 8+ chars, uppercase, lowercase, digit, special char. HashPassword(plain string) (string, error) using bcrypt cost=10. CheckPassword(hash, plain string) error using bcrypt.CompareHashAndPassword",
+        "Write credentials_test.go: table-driven tests for password validation (valid, too short, missing uppercase, missing digit, etc.), hash+verify round-trip, wrong password rejection",
+        "Write user_test.go: test NewUser with valid/invalid inputs",
+        "Implement repository.go: UserRepository interface with Create, GetByID, GetByEmail, Update methods"
+      ],
+      "tdd": {
+        "required": true,
+        "failingFirst": "go test ./internal/identity/domain/user/... should fail (no implementation)",
+        "passingAfter": "go test ./internal/identity/domain/user/... -v should pass"
+      },
+      "blockedBy": []
+    },
+    {
+      "id": 1,
+      "name": "RefreshToken entity + SessionRepository interface",
+      "action": "Implement RefreshToken entity in internal/identity/domain/session/. Handles token generation (crypto/rand), hashing (SHA-256), expiry checking, and revocation. SessionRepository interface.",
+      "files": [
+        "internal/identity/domain/session/session.go",
+        "internal/identity/domain/session/session_test.go",
+        "internal/identity/domain/session/repository.go"
+      ],
+      "verify": [
+        "go test ./internal/identity/domain/session/... -v"
+      ],
+      "microSteps": [
+        "Implement session.go: RefreshToken struct (ID, UserID, TokenHash, ExpiresAt, Revoked, CreatedAt). GenerateToken() (rawToken string, hashedToken string, error) using crypto/rand for 32 bytes + SHA-256 hash. IsExpired() bool. IsRevoked() bool. NewRefreshToken(userID, rawToken, ttl) constructor",
+        "Write session_test.go: test token generation (raw != hash), expiry checking, revocation state",
+        "Implement repository.go: SessionRepository interface with Create, GetByTokenHash, RevokeByID, RevokeAllForUser methods"
+      ],
+      "tdd": {
+        "required": true,
+        "failingFirst": "go test ./internal/identity/domain/session/... should fail",
+        "passingAfter": "go test ./internal/identity/domain/session/... -v should pass"
+      },
+      "blockedBy": []
+    },
+    {
+      "id": 2,
+      "name": "Database migrations (users + refresh_tokens)",
+      "action": "Create SQL migration files for the users and refresh_tokens tables.",
+      "files": [
+        "migrations/003_users.up.sql",
+        "migrations/003_users.down.sql",
+        "migrations/004_refresh_tokens.up.sql",
+        "migrations/004_refresh_tokens.down.sql"
+      ],
+      "verify": [
+        "test -f migrations/003_users.up.sql && grep 'CREATE TABLE users' migrations/003_users.up.sql",
+        "test -f migrations/004_refresh_tokens.up.sql && grep 'CREATE TABLE refresh_tokens' migrations/004_refresh_tokens.up.sql"
+      ],
+      "microSteps": [
+        "Create 003_users.up.sql: users table (id UUID PK DEFAULT gen_random_uuid(), email TEXT NOT NULL UNIQUE, password_hash TEXT NOT NULL, display_name TEXT NOT NULL, created_at TIMESTAMPTZ DEFAULT now(), updated_at TIMESTAMPTZ DEFAULT now()). Index on email.",
+        "Create 003_users.down.sql: DROP TABLE IF EXISTS users",
+        "Create 004_refresh_tokens.up.sql: refresh_tokens table (id UUID PK, user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE, token_hash TEXT NOT NULL UNIQUE, expires_at TIMESTAMPTZ NOT NULL, revoked BOOLEAN NOT NULL DEFAULT FALSE, created_at TIMESTAMPTZ DEFAULT now()). Indexes on user_id and token_hash.",
+        "Create 004_refresh_tokens.down.sql: DROP TABLE IF EXISTS refresh_tokens"
+      ],
+      "tdd": {
+        "required": false,
+        "reason": "SQL migration files — verified by file existence and content grep. Integration test requires running PostgreSQL."
+      },
+      "blockedBy": []
+    }
+  ],
+  "planVerify": [
+    "go test ./internal/identity/domain/... -v",
+    "go vet ./internal/identity/...",
+    "test -f migrations/003_users.up.sql",
+    "test -f migrations/004_refresh_tokens.up.sql"
+  ],
+  "commitMessage": "feat(identity): domain layer — User aggregate, Credentials, RefreshToken, migrations",
+  "timestamp": "2026-03-20T00:00:00Z"
+}

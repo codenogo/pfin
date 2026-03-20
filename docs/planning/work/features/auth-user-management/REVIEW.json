@@ -1,0 +1,209 @@
+{
+  "automated": [
+    {
+      "name": "lint",
+      "result": "pass"
+    },
+    {
+      "name": "types",
+      "result": "skipped"
+    },
+    {
+      "name": "tests",
+      "result": "pass"
+    }
+  ],
+  "blockers": [],
+  "branch": "feature/auth-user-management",
+  "feature": "auth-user-management",
+  "impactAnalysis": {
+    "affected_files": [],
+    "affected_symbols": [],
+    "enabled": true,
+    "graph_status": "indexed",
+    "per_file": {
+      ".cnogo/scripts/__pycache__/workflow_checks_core.cpython-314.pyc": [],
+      ".cnogo/scripts/context/__pycache__/embeddings.cpython-314.pyc": [],
+      ".cnogo/scripts/context/__pycache__/search.cpython-314.pyc": [],
+      ".cnogo/scripts/context/phases/__pycache__/__init__.cpython-314.pyc": [],
+      ".cnogo/scripts/context/phases/__pycache__/calls.cpython-314.pyc": [],
+      ".cnogo/scripts/context/phases/__pycache__/exports.cpython-314.pyc": [],
+      ".cnogo/scripts/context/phases/__pycache__/heritage.cpython-314.pyc": [],
+      ".cnogo/scripts/context/phases/__pycache__/impact.cpython-314.pyc": [],
+      ".cnogo/scripts/context/phases/__pycache__/imports.cpython-314.pyc": [],
+      ".cnogo/scripts/context/phases/__pycache__/structure.cpython-314.pyc": [],
+      ".cnogo/scripts/context/phases/__pycache__/symbols.cpython-314.pyc": [],
+      ".cnogo/scripts/context/phases/__pycache__/types.cpython-314.pyc": [],
+      ".cnogo/scripts/memory/__pycache__/context.cpython-314.pyc": [],
+      ".cnogo/scripts/memory/__pycache__/sync.cpython-314.pyc": []
+    },
+    "total_affected": 0
+  },
+  "invariants": {
+    "findings": [],
+    "summary": {
+      "fail": 0,
+      "total": 0,
+      "warn": 0
+    }
+  },
+  "packages": [
+    {
+      "checks": [
+        {
+          "cmd": "go vet ./...",
+          "cwd": ".",
+          "exitCode": 0,
+          "fullOutputPath": null,
+          "name": "lint",
+          "output": "",
+          "outputReducer": "empty",
+          "reason": null,
+          "result": "pass",
+          "tokenTelemetry": {
+            "inputTokens": 0,
+            "outputTokens": 0,
+            "savedTokens": 0,
+            "savingsPct": 0.0
+          }
+        },
+        {
+          "cmd": null,
+          "name": "typecheck",
+          "result": "skipped"
+        },
+        {
+          "cmd": "go test ./... -short",
+          "cwd": ".",
+          "exitCode": 0,
+          "fullOutputPath": null,
+          "name": "test",
+          "output": "OUTPUT (tail):\n?   \tgithub.com/codenogo/pfin/cmd/api\t[no test files]\nok  \tgithub.com/codenogo/pfin/internal/common/auth\t(cached)\nok  \tgithub.com/codenogo/pfin/internal/common/event\t(cached)\nok  \tgithub.com/codenogo/pfin/internal/common/server\t(cached)\n?   \tgithub.com/codenogo/pfin/internal/config\t[no test files]\nok  \tgithub.com/codenogo/pfin/internal/identity/adapters\t0.866s\nok  \tgithub.com/codenogo/pfin/internal/identity/app/command\t1.262s\nok  \tgithub.com/codenogo/pfin/internal/identity/domain/session\t(cached)\nok  \tgithub.com/codenogo/pfin/internal/identity/domain/user\t(cached)\nok  \tgithub.com/codenogo/pfin/internal/identity/ports\t1.247s\n?   \tgithub.com/codenogo/pfin/internal/identity/service\t[no test files]\nok  \tgithub.com/codenogo/pfin/pkg/currency\t(cached)\nok  \tgithub.com/codenogo/pfin/pkg/errs\t(cached)\nok  \tgithub.com/codenogo/pfin/pkg/money\t(cached)\nok  \tgithub.com/codenogo/pfin/pkg/scope\t(cached)",
+          "outputReducer": "failure-focus",
+          "reason": null,
+          "result": "pass",
+          "tokenTelemetry": {
+            "inputTokens": 225,
+            "outputTokens": 229,
+            "savedTokens": 0,
+            "savingsPct": 0.0
+          }
+        }
+      ],
+      "kind": "go",
+      "name": "pfin",
+      "path": "."
+    },
+    {
+      "checks": [
+        {
+          "cmd": "ruff check .",
+          "name": "lint",
+          "reason": "no changed files for package",
+          "result": "skipped"
+        },
+        {
+          "cmd": null,
+          "name": "typecheck",
+          "result": "skipped"
+        },
+        {
+          "cmd": "pytest -q --tb=short",
+          "name": "test",
+          "reason": "no changed files for package",
+          "result": "skipped"
+        }
+      ],
+      "kind": "python",
+      "name": "cython",
+      "path": ".cnogo/.venv/lib/python3.14/site-packages/numpy/_core/tests/examples/cython"
+    },
+    {
+      "checks": [
+        {
+          "cmd": "ruff check .",
+          "name": "lint",
+          "reason": "no changed files for package",
+          "result": "skipped"
+        },
+        {
+          "cmd": null,
+          "name": "typecheck",
+          "result": "skipped"
+        },
+        {
+          "cmd": "pytest -q --tb=short",
+          "name": "test",
+          "reason": "no changed files for package",
+          "result": "skipped"
+        }
+      ],
+      "kind": "python",
+      "name": "limited_api",
+      "path": ".cnogo/.venv/lib/python3.14/site-packages/numpy/_core/tests/examples/limited_api"
+    },
+    {
+      "checks": [
+        {
+          "cmd": "ruff check .",
+          "name": "lint",
+          "reason": "no changed files for package",
+          "result": "skipped"
+        },
+        {
+          "cmd": null,
+          "name": "typecheck",
+          "result": "skipped"
+        },
+        {
+          "cmd": "pytest -q --tb=short",
+          "name": "test",
+          "reason": "no changed files for package",
+          "result": "skipped"
+        }
+      ],
+      "kind": "python",
+      "name": "f2py",
+      "path": ".cnogo/.venv/lib/python3.14/site-packages/numpy/f2py"
+    }
+  ],
+  "patternCompliance": [
+    {"pattern": "DDD bounded context isolation", "status": "compliant"},
+    {"pattern": "Clean architecture dependency rule", "status": "compliant"},
+    {"pattern": "Token security (hashed storage, httpOnly cookie, rotation)", "status": "compliant"},
+    {"pattern": "Nil safety", "status": "compliant", "notes": "Fixed: refresh.go and logout.go now check both err and nil result"}
+  ],
+  "performanceFindings": [],
+  "principleNotes": ["56 tests across 6 packages", "Nil pointer bugs caught and fixed by new tests", "isDuplicateKey now uses pgconn.PgError properly"],
+  "schemaVersion": 4,
+  "securityFindings": [
+    {"severity": "pass", "finding": "All prior security findings still hold — bcrypt, hashed tokens, httpOnly cookie, rotation, no enumeration"}
+  ],
+  "stageReviews": [
+    {
+      "stage": "spec-compliance",
+      "status": "pass",
+      "findings": [],
+      "evidence": ["All 11 CONTEXT decisions implemented", "56 tests pass across 6 packages", "Bugs found in first review are now fixed"],
+      "notes": "Spec compliant. Test gaps from first review are filled."
+    },
+    {
+      "stage": "code-quality",
+      "status": "pass",
+      "findings": [],
+      "evidence": ["Nil pointer bugs fixed in refresh + logout handlers", "isDuplicateKey uses pgconn.PgError code 23505", "HTTP handler tests cover all endpoints", "go vet clean"],
+      "notes": "All review follow-ups addressed. No remaining issues."
+    }
+  ],
+  "timestamp": "2026-03-20T18:30:52Z",
+  "tokenTelemetry": {
+    "checksRun": 2,
+    "checksSkipped": 10,
+    "inputTokens": 225,
+    "outputTokens": 229,
+    "savedTokens": 0,
+    "savingsPct": 0.0
+  },
+  "verdict": "pass",
+  "warnings": []
+}
