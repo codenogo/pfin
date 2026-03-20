@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "feature": "project-foundation",
+  "planNumber": 1,
+  "goal": "Scaffold the Go module, DDD directory structure, Docker Compose, Makefile, initial migrations, and .gitignore. No Go code yet — just the skeleton and devops files.",
+  "tasks": [
+    {
+      "id": 0,
+      "name": "Go module + DDD directory skeleton",
+      "action": "Initialize Go module (github.com/codenogo/pfin, go 1.26). Create all directories per DDD structure. Add .gitkeep files to preserve empty dirs. Create .gitignore (Go standard + .env + .cnogo/memory.db). Create .env.example with placeholder config.",
+      "files": [
+        "go.mod",
+        ".gitignore",
+        ".env.example",
+        "cmd/api/main.go",
+        "internal/accounting/domain/.gitkeep",
+        "internal/household/domain/.gitkeep",
+        "internal/identity/domain/.gitkeep",
+        "internal/budgeting/domain/.gitkeep",
+        "internal/debt/domain/.gitkeep",
+        "internal/portfolio/domain/.gitkeep",
+        "internal/reporting/domain/.gitkeep",
+        "internal/importing/domain/.gitkeep",
+        "internal/common/event/.gitkeep",
+        "internal/common/auth/.gitkeep",
+        "internal/common/server/.gitkeep",
+        "pkg/money/.gitkeep",
+        "pkg/currency/.gitkeep",
+        "pkg/scope/.gitkeep",
+        "pkg/errs/.gitkeep"
+      ],
+      "verify": [
+        "test -f go.mod && grep 'github.com/codenogo/pfin' go.mod",
+        "test -f cmd/api/main.go",
+        "test -d internal/accounting/domain",
+        "test -d internal/common/event",
+        "test -d pkg/money"
+      ],
+      "microSteps": [
+        "Create go.mod with module github.com/codenogo/pfin and go 1.26",
+        "Create cmd/api/main.go with minimal main() that prints 'pfin starting'",
+        "Create all internal/ directories: accounting, household, identity, budgeting, debt, portfolio, reporting, importing — each with domain/ stub",
+        "Create internal/common/ with event/, auth/, server/ stubs",
+        "Create pkg/ with money/, currency/, scope/, errs/ stubs",
+        "Create .gitignore with Go patterns, .env, vendor/, *.exe, .cnogo/memory.db",
+        "Create .env.example with DATABASE_URL, JWT_SECRET, PORT, ENV placeholders"
+      ],
+      "tdd": {
+        "required": false,
+        "reason": "Pure scaffold — no logic to test. Verified by file existence checks."
+      },
+      "blockedBy": []
+    },
+    {
+      "id": 1,
+      "name": "Docker Compose + Makefile + migrations",
+      "action": "Create docker-compose.yml with PostgreSQL 18 service. Create Makefile with standard targets. Create initial SQL migration files for extensions and event outbox table.",
+      "files": [
+        "docker-compose.yml",
+        "Makefile",
+        "migrations/001_extensions.up.sql",
+        "migrations/001_extensions.down.sql",
+        "migrations/002_event_outbox.up.sql",
+        "migrations/002_event_outbox.down.sql"
+      ],
+      "verify": [
+        "test -f docker-compose.yml && grep 'postgres:18' docker-compose.yml",
+        "test -f Makefile && make -n build 2>/dev/null",
+        "test -f migrations/001_extensions.up.sql",
+        "test -f migrations/002_event_outbox.up.sql"
+      ],
+      "microSteps": [
+        "Create docker-compose.yml: postgres:18 service (port 5432, volume, env vars from .env), app service (build from Dockerfile, depends_on postgres)",
+        "Create Makefile with targets: build, test, lint, run, migrate-up, migrate-down, migrate-create, docker-up, docker-down",
+        "Create 001_extensions.up.sql: CREATE EXTENSION IF NOT EXISTS pgcrypto; CREATE EXTENSION IF NOT EXISTS pg_trgm;",
+        "Create 001_extensions.down.sql: DROP EXTENSION IF EXISTS pg_trgm; DROP EXTENSION IF EXISTS pgcrypto;",
+        "Create 002_event_outbox.up.sql: event_outbox table (id UUID, event_type TEXT, aggregate_type TEXT, aggregate_id UUID, payload JSONB, metadata JSONB, created_at TIMESTAMPTZ, processed_at TIMESTAMPTZ) with indexes",
+        "Create 002_event_outbox.down.sql: DROP TABLE IF EXISTS event_outbox;"
+      ],
+      "tdd": {
+        "required": false,
+        "reason": "Infrastructure files — Docker and SQL. Verified by file existence and content checks."
+      },
+      "blockedBy": [0]
+    },
+    {
+      "id": 2,
+      "name": "OpenAPI spec skeleton",
+      "action": "Create minimal OpenAPI 3.1 spec with /health endpoint and info section. This serves as the starting point for all future endpoint definitions.",
+      "files": [
+        "api/openapi.yaml"
+      ],
+      "verify": [
+        "test -f api/openapi.yaml && grep 'openapi: 3.1' api/openapi.yaml"
+      ],
+      "microSteps": [
+        "Create api/openapi.yaml with OpenAPI 3.1.0, info (title: pfin API, version: 0.1.0, description), servers (localhost:8080)",
+        "Define GET /health endpoint: 200 response with JSON schema (status: string, uptime: string, database: string)"
+      ],
+      "tdd": {
+        "required": false,
+        "reason": "YAML specification file — no executable logic."
+      },
+      "blockedBy": []
+    }
+  ],
+  "planVerify": [
+    "test -f go.mod",
+    "test -f docker-compose.yml",
+    "test -f Makefile",
+    "test -f api/openapi.yaml",
+    "test -d internal/accounting/domain",
+    "test -d internal/common/event",
+    "test -d pkg/money",
+    "test -f migrations/001_extensions.up.sql",
+    "test -f migrations/002_event_outbox.up.sql"
+  ],
+  "commitMessage": "feat(foundation): scaffold Go module, DDD directories, Docker, Makefile, migrations",
+  "timestamp": "2026-03-20T00:00:00Z"
+}

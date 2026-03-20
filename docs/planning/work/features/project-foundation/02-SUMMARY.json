@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "feature": "project-foundation",
+  "planNumber": 2,
+  "outcome": "complete",
+  "changes": [
+    "pkg/currency/ — Currency value object with ISO 4217 validation + tests",
+    "pkg/money/ — Money value object (shopspring/decimal, immutable, Currency-aware) + tests",
+    "pkg/scope/ — Scope value object (Personal/Household) + tests",
+    "pkg/errs/ — DomainError with codes and HTTP status mapping + tests"
+  ],
+  "verification": [
+    {"command": "go test ./pkg/currency/... -v", "result": "pass"},
+    {"command": "go test ./pkg/money/... -v", "result": "pass"},
+    {"command": "go test ./pkg/scope/... -v", "result": "pass"},
+    {"command": "go test ./pkg/errs/... -v", "result": "pass"},
+    {"command": "go vet ./pkg/...", "result": "pass"}
+  ],
+  "commit": "2b3cf7c",
+  "timestamp": "2026-03-20T00:00:00Z"
+}

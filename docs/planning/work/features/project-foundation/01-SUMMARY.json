@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "feature": "project-foundation",
+  "planNumber": 1,
+  "outcome": "complete",
+  "changes": [
+    "go.mod — Go 1.26 module github.com/codenogo/pfin",
+    "cmd/api/main.go — composition root placeholder",
+    "internal/ — 8 bounded context directory stubs",
+    "docker-compose.yml — PostgreSQL 18",
+    "Makefile — 9 targets",
+    "migrations/001_extensions — pgcrypto + pg_trgm",
+    "migrations/002_event_outbox — async event outbox table",
+    "api/openapi.yaml — OpenAPI 3.1 spec with /health",
+    ".env.example, .gitignore"
+  ],
+  "verification": [
+    {"command": "test -f go.mod", "result": "pass"},
+    {"command": "test -f docker-compose.yml", "result": "pass"},
+    {"command": "test -f Makefile", "result": "pass"},
+    {"command": "test -f api/openapi.yaml", "result": "pass"},
+    {"command": "test -d internal/accounting/domain", "result": "pass"},
+    {"command": "test -d internal/common/event", "result": "pass"},
+    {"command": "test -d pkg/money", "result": "pass"},
+    {"command": "test -f migrations/001_extensions.up.sql", "result": "pass"},
+    {"command": "test -f migrations/002_event_outbox.up.sql", "result": "pass"}
+  ],
+  "commit": "2b3cf7c",
+  "timestamp": "2026-03-20T00:00:00Z"
+}

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "feature": "project-foundation",
+  "planNumber": 3,
+  "outcome": "complete",
+  "changes": [
+    "internal/common/event/ — Event interface, sync Bus, AsyncBus, CompositePublisher + tests (race-safe)",
+    "internal/config/ — Config struct from env vars",
+    "internal/common/server/ — JSON/Error response helpers, middleware (RequestID, Logger, Recovery, CORS), HealthHandler + tests",
+    "cmd/api/main.go — full composition root: config → pgx pool → event bus → chi router → graceful shutdown"
+  ],
+  "verification": [
+    {"command": "go build -o bin/pfin ./cmd/api/...", "result": "pass"},
+    {"command": "go test ./internal/common/event/... -v -race", "result": "pass"},
+    {"command": "go test ./internal/common/server/... -v", "result": "pass"},
+    {"command": "go vet ./...", "result": "pass"}
+  ],
+  "commit": "2b3cf7c",
+  "timestamp": "2026-03-20T00:00:00Z"
+}

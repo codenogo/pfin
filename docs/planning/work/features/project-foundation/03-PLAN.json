@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "feature": "project-foundation",
+  "planNumber": 3,
+  "goal": "Implement the event bus, HTTP server with middleware chain, health endpoint, config loading, and graceful shutdown. Wire everything in cmd/api/main.go. This is the running application skeleton.",
+  "tasks": [
+    {
+      "id": 0,
+      "name": "Event bus (sync + async + composite)",
+      "action": "Implement internal/common/event — the in-process event bus with sync dispatch, async dispatch, and composite publisher. ~300 lines total. All with tests.",
+      "files": [
+        "internal/common/event/event.go",
+        "internal/common/event/bus.go",
+        "internal/common/event/bus_test.go",
+        "internal/common/event/async.go",
+        "internal/common/event/async_test.go",
+        "internal/common/event/composite.go",
+        "internal/common/event/composite_test.go"
+      ],
+      "verify": [
+        "go test ./internal/common/event/... -v -race"
+      ],
+      "microSteps": [
+        "Implement event.go: Event interface (EventName() string), Handler type (func(ctx, Event) error), Publisher interface (Publish(ctx, ...Event) error)",
+        "Implement bus.go: Bus struct with sync dispatch — Subscribe(eventName, handler), Publish runs handlers sequentially, returns first error",
+        "Write bus_test.go: test subscribe + publish, multiple handlers, error propagation, unknown event name",
+        "Implement async.go: AsyncBus with goroutine worker pool — Subscribe, Publish enqueues to channel, workers process. Graceful shutdown via Close().",
+        "Write async_test.go: test async delivery, handler errors logged not returned, Close() drains queue. Use -race flag.",
+        "Implement composite.go: CompositePublisher wrapping sync Bus + async AsyncBus. Publish runs sync first, then async. If sync fails, async is skipped.",
+        "Write composite_test.go: test sync-then-async ordering, sync failure blocks async"
+      ],
+      "tdd": {
+        "required": true,
+        "failingFirst": "go test ./internal/common/event/... should fail",
+        "passingAfter": "go test ./internal/common/event/... -v -race should pass"
+      },
+      "blockedBy": []
+    },
+    {
+      "id": 1,
+      "name": "Config + server + error responses + middleware",
+      "action": "Implement config loading (env vars → struct), HTTP server with chi + middleware chain (RequestID, slog, Recovery, CORS, RateLimit), error response helper mapping DomainError → JSON, and health handler.",
+      "files": [
+        "internal/config/config.go",
+        "internal/common/server/server.go",
+        "internal/common/server/response.go",
+        "internal/common/server/response_test.go",
+        "internal/common/server/middleware.go",
+        "internal/common/server/health.go",
+        "internal/common/server/health_test.go"
+      ],
+      "verify": [
+        "go test ./internal/config/... -v",
+        "go test ./internal/common/server/... -v"
+      ],
+      "microSteps": [
+        "Implement config.go: Config struct (Port, DatabaseURL, JWTSecret, Env), Load() from os.Getenv with defaults",
+        "Implement server.go: NewServer(cfg, handler) with http.Server, ListenAndServe(), GracefulShutdown(ctx) with SIGTERM handling",
+        "Implement response.go: JSON(w, status, data), Error(w, err) mapping DomainError codes to HTTP status + JSON error body {code, message}",
+        "Write response_test.go: test JSON rendering, DomainError → HTTP status mapping, unknown error → 500",
+        "Implement middleware.go: RequestID (X-Request-ID header), StructuredLogger (slog with request_id, method, path, duration), Recovery (panic → 500), CORS (configurable origins), RateLimit (x/time/rate, per-IP)",
+        "Implement health.go: HealthHandler(db) returning {status: 'ok', uptime: '...', database: 'ok'/'error'} with DB ping",
+        "Write health_test.go: test health response format, test with nil DB (database: 'unavailable')"
+      ],
+      "tdd": {
+        "required": true,
+        "failingFirst": "go test ./internal/common/server/... should fail",
+        "passingAfter": "go test ./internal/common/server/... -v should pass"
+      },
+      "blockedBy": [0]
+    },
+    {
+      "id": 2,
+      "name": "Composition root — cmd/api/main.go wiring",
+      "action": "Wire everything together in main.go: load config, connect pgx pool, create event bus, build chi router with middleware + health endpoint, start server with graceful shutdown. Add go.sum by running go mod tidy.",
+      "files": [
+        "cmd/api/main.go"
+      ],
+      "verify": [
+        "go build ./cmd/api/...",
+        "go vet ./..."
+      ],
+      "microSteps": [
+        "Implement main.go run() function: load config, setup slog (JSON for prod, text for dev), connect pgx pool with config.DatabaseURL, create CompositePublisher, build chi router with middleware chain + health endpoint, create server, handle SIGTERM for graceful shutdown",
+        "Run go mod tidy to resolve all dependencies and generate go.sum",
+        "Verify go build ./cmd/api/... compiles cleanly",
+        "Verify go vet ./... passes"
+      ],
+      "tdd": {
+        "required": false,
+        "reason": "Composition root — wiring code. Verified by successful compilation and go vet. Integration test would require running PostgreSQL."
+      },
+      "blockedBy": [1]
+    }
+  ],
+  "planVerify": [
+    "go build ./cmd/api/...",
+    "go test ./internal/common/... -v -race",
+    "go test ./pkg/... -v",
+    "go vet ./..."
+  ],
+  "commitMessage": "feat(foundation): implement event bus, HTTP server, middleware, health endpoint, and composition root",
+  "timestamp": "2026-03-20T00:00:00Z"
+}

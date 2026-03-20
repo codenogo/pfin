@@ -26,3 +26,35 @@
 .cnogo/task-descriptions-*.json
 .cnogo/prompt-*.md
 # <<< cnogo
+
+# Go binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+pfin
+
+# Go test binary
+*.test
+*.out
+
+# Go workspace
+vendor/
+
+# Environment
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker volumes
+pgdata/
