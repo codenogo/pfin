@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "feature": "project-foundation",
+  "planNumber": 2,
+  "goal": "Implement the shared kernel value objects (pkg/) — Money, Currency, Scope, DomainError. These are the foundational types used across all bounded contexts. All with comprehensive tests.",
+  "tasks": [
+    {
+      "id": 0,
+      "name": "Currency + Money value objects",
+      "action": "Implement pkg/currency (ISO 4217 validation, String(), common constants) and pkg/money (shopspring/decimal wrapper, immutable, Currency-aware arithmetic: Add, Sub, Mul, Negate, IsZero, IsNegative, Equal, String, NewFromString, NewFromInt).",
+      "files": [
+        "pkg/currency/currency.go",
+        "pkg/currency/currency_test.go",
+        "pkg/money/money.go",
+        "pkg/money/money_test.go"
+      ],
+      "verify": [
+        "go test ./pkg/currency/... -v",
+        "go test ./pkg/money/... -v"
+      ],
+      "microSteps": [
+        "Implement pkg/currency/currency.go: Currency type (string), validation func, constants (USD, EUR, GBP, KES, etc.), String()",
+        "Write pkg/currency/currency_test.go: test valid currencies, invalid rejection, String()",
+        "Implement pkg/money/money.go: Money struct (amount decimal.Decimal, currency Currency), constructor NewMoney(amount, currency), NewFromString, NewFromInt, arithmetic (Add, Sub, Mul — must match currencies), Negate, IsZero, IsNegative, Equal, String (formatted with 2 decimal places), Amount() accessor, Currency() accessor",
+        "Write pkg/money/money_test.go: table-driven tests for all operations, currency mismatch errors, immutability verification, zero/negative checks"
+      ],
+      "tdd": {
+        "required": true,
+        "failingFirst": "go test ./pkg/money/... should fail (no implementation yet)",
+        "passingAfter": "go test ./pkg/money/... -v should pass all tests"
+      },
+      "blockedBy": []
+    },
+    {
+      "id": 1,
+      "name": "Scope value object",
+      "action": "Implement pkg/scope — the dual-scope type used in every query. Personal(userID) or Household(householdID). Includes validation, accessors, and SQL scanning support.",
+      "files": [
+        "pkg/scope/scope.go",
+        "pkg/scope/scope_test.go"
+      ],
+      "verify": [
+        "go test ./pkg/scope/... -v"
+      ],
+      "microSteps": [
+        "Implement pkg/scope/scope.go: Scope struct with kind (personal/household), userID (uuid.UUID), householdID (uuid.UUID). Constructors: NewPersonal(userID), NewHousehold(householdID). Methods: IsPersonal(), IsHousehold(), UserID(), HouseholdID(), String(). Validation: personal requires userID, household requires householdID.",
+        "Write pkg/scope/scope_test.go: test Personal construction, Household construction, accessor methods, validation errors, String()"
+      ],
+      "tdd": {
+        "required": true,
+        "failingFirst": "go test ./pkg/scope/... should fail",
+        "passingAfter": "go test ./pkg/scope/... -v should pass all tests"
+      },
+      "blockedBy": []
+    },
+    {
+      "id": 2,
+      "name": "DomainError type",
+      "action": "Implement pkg/errs — typed errors with machine-readable codes that map to HTTP status. Sentinel errors for common cases. Error wrapping support.",
+      "files": [
+        "pkg/errs/errors.go",
+        "pkg/errs/errors_test.go"
+      ],
+      "verify": [
+        "go test ./pkg/errs/... -v"
+      ],
+      "microSteps": [
+        "Implement pkg/errs/errors.go: DomainError struct (Code string, Message string, Err error), Error() string, Unwrap() error. Code constants: VALIDATION_ERROR, NOT_FOUND, CONFLICT, UNAUTHORIZED, FORBIDDEN, UNBALANCED_ENTRY, INTERNAL. Constructor: New(code, message), Wrap(code, message, err). Helper constructors: NotFound(entity, id), Conflict(message), Validation(message), Unauthorized(), Forbidden(). HTTPStatus() method mapping codes to HTTP status codes.",
+        "Write pkg/errs/errors_test.go: test error construction, code mapping, Unwrap chain, errors.Is/As compatibility, HTTPStatus mapping"
+      ],
+      "tdd": {
+        "required": true,
+        "failingFirst": "go test ./pkg/errs/... should fail",
+        "passingAfter": "go test ./pkg/errs/... -v should pass all tests"
+      },
+      "blockedBy": []
+    }
+  ],
+  "planVerify": [
+    "go test ./pkg/... -v",
+    "go vet ./pkg/..."
+  ],
+  "commitMessage": "feat(foundation): implement shared kernel — Money, Currency, Scope, DomainError value objects with tests",
+  "timestamp": "2026-03-20T00:00:00Z"
+}

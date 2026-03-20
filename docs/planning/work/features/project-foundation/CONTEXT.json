@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "feature": "project-foundation",
+  "displayName": "Project Foundation & Shared Kernel",
+  "parentShape": {
+    "path": "docs/planning/work/ideas/personal-finance/SHAPE.json",
+    "timestamp": "2026-03-20T00:00:00Z",
+    "schemaVersion": 1
+  },
+  "featureStub": {
+    "path": "docs/planning/work/features/project-foundation/FEATURE.json",
+    "timestamp": "2026-03-20T00:00:00Z",
+    "schemaVersion": 1
+  },
+  "decisions": [
+    {
+      "id": "PF-001",
+      "title": "Go module path",
+      "decision": "github.com/codenogo/pfin",
+      "rationale": "User's GitHub org"
+    },
+    {
+      "id": "PF-002",
+      "title": "Go version",
+      "decision": "Go 1.26 (latest stable, released Feb 2026)",
+      "rationale": "Latest stable with Green Tea GC, improved generics, 30% less cgo overhead"
+    },
+    {
+      "id": "PF-003",
+      "title": "PostgreSQL version",
+      "decision": "PostgreSQL 18 (18.3, latest stable as of Feb 2026)",
+      "rationale": "Latest stable major version"
+    },
+    {
+      "id": "PF-004",
+      "title": "Health check + OpenAPI",
+      "decision": "Include GET /health (DB ping + uptime) and GET /api/v1/openapi.yaml from day one",
+      "rationale": "Standard for production services. Health check enables monitoring. OpenAPI enables frontend codegen."
+    },
+    {
+      "id": "PF-005",
+      "title": "Shared kernel packages",
+      "decision": "pkg/money (shopspring/decimal wrapper), pkg/currency (ISO 4217), pkg/scope (Personal/Household), pkg/errs (typed DomainError with codes)",
+      "rationale": "Minimal cross-context types. Only what multiple bounded contexts genuinely share."
+    },
+    {
+      "id": "PF-006",
+      "title": "Event bus implementation",
+      "decision": "Custom sync+async composite event bus in internal/common/event/ (~300 lines). Bus (sync), AsyncBus (goroutine workers), CompositePublisher (sync first, then async). Event interface with EventName() string.",
+      "rationale": "Simple, no external dependencies. Sync for critical side effects (balance projections), async for non-critical (notifications). Upgrade to Watermill if complexity warrants."
+    },
+    {
+      "id": "PF-007",
+      "title": "HTTP framework",
+      "decision": "chi v5 with middleware chain: RequestID → slog Logger → Recovery → CORS → RateLimit. net/http compatible.",
+      "rationale": "Locked in shape. chi is the standard Go router for DDD projects."
+    },
+    {
+      "id": "PF-008",
+      "title": "Database driver",
+      "decision": "pgx v5 (jackc/pgx) with connection pool. No ORM.",
+      "rationale": "Locked in shape. PostgreSQL-native, LISTEN/NOTIFY support, best Go PG driver."
+    },
+    {
+      "id": "PF-009",
+      "title": "Migration framework",
+      "decision": "golang-migrate/migrate v4 with SQL migration files in migrations/ directory",
+      "rationale": "Locked in shape. SQL-based, versioned, widely adopted."
+    },
+    {
+      "id": "PF-010",
+      "title": "DI approach",
+      "decision": "Constructor injection with manual wiring in cmd/api/main.go. No DI framework.",
+      "rationale": "Locked in shape. Compile-time safety. Consider google/wire at 30+ services."
+    },
+    {
+      "id": "PF-011",
+      "title": "Logging",
+      "decision": "log/slog (stdlib) with JSON handler for production, text handler for development",
+      "rationale": "Go 1.26 stdlib. No external logging library needed. Structured, leveled, context-aware."
+    },
+    {
+      "id": "PF-012",
+      "title": "Config loading",
+      "decision": "os.Getenv with a Config struct. No viper or external config library.",
+      "rationale": "Locked in shape. Simple, explicit, no magic."
+    },
+    {
+      "id": "PF-013",
+      "title": "Docker Compose",
+      "decision": "Docker Compose with PostgreSQL 18, app service. .env file for local config.",
+      "rationale": "Standard local development setup."
+    },
+    {
+      "id": "PF-014",
+      "title": "Makefile targets",
+      "decision": "build, test, lint (golangci-lint), migrate-up, migrate-down, migrate-create, docker-up, docker-down, run",
+      "rationale": "Standard Go project targets. golangci-lint for comprehensive linting."
+    },
+    {
+      "id": "PF-015",
+      "title": "Initial migrations",
+      "decision": "001_extensions.up.sql (enable pgcrypto, pg_trgm), 002_event_outbox.up.sql (outbox table for async events)",
+      "rationale": "pgcrypto for gen_random_uuid(), pg_trgm for description search. Outbox table needed by event bus from day one."
+    }
+  ],
+  "constraints": [
+    "Domain layer (internal/*/domain/) must have zero external dependencies beyond pkg/ and shopspring/decimal + google/uuid",
+    "Shared kernel (pkg/) must remain minimal — only types genuinely needed by 2+ contexts",
+    "No circular imports between bounded context packages",
+    "All constructors must accept interfaces, not concrete types",
+    "Event bus must support both sync and async dispatch from initial release"
+  ],
+  "openQuestions": [],
+  "relatedCode": [],
+  "research": [
+    {
+      "slug": "ddd-architecture-go-personal-finance",
+      "path": "docs/planning/work/research/ddd-architecture-go-personal-finance.md",
+      "relevance": "Project structure, package layout, aggregate patterns, value objects"
+    },
+    {
+      "slug": "event-driven-architecture",
+      "path": "docs/planning/work/research/event-driven-architecture.md",
+      "relevance": "Event bus design, CompositePublisher, outbox table schema"
+    },
+    {
+      "slug": "go-architecture-patterns",
+      "path": "docs/planning/work/research/go-architecture-patterns.md",
+      "relevance": "Clean architecture layers, DI wiring, middleware chain, error handling, Makefile"
+    }
+  ],
+  "shapeFeedback": [],
+  "timestamp": "2026-03-20T00:00:00Z"
+}

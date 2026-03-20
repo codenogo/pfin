@@ -1,0 +1,72 @@
+openapi: "3.1.0"
+info:
+  title: pfin API
+  version: 0.1.0
+  description: Personal finance platform with full double-entry accounting, household management, and wallet-based UX.
+  contact:
+    name: codenogo
+    url: https://github.com/codenogo/pfin
+
+servers:
+  - url: http://localhost:8080
+    description: Local development
+
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Health check
+      description: Returns application health status including database connectivity.
+      tags:
+        - system
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+        "503":
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - uptime
+        - database
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded, error]
+        uptime:
+          type: string
+          description: Human-readable uptime duration
+        database:
+          type: string
+          enum: [ok, error, unavailable]
+
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Machine-readable error code
+        message:
+          type: string
+          description: Human-readable error message
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

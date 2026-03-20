@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: pfin-postgres
+    environment:
+      POSTGRES_USER: pfin
+      POSTGRES_PASSWORD: pfin
+      POSTGRES_DB: pfin
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pfin"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
