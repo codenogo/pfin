@@ -43,7 +43,7 @@ func (h *RefreshHandler) Handle(ctx context.Context, cmd RefreshCmd) (*TokenPair
 	tokenHash := session.HashToken(cmd.RawToken)
 
 	existing, err := h.sessions.GetByTokenHash(ctx, tokenHash)
-	if err != nil {
+	if err != nil || existing == nil {
 		return nil, errs.New(errs.CodeUnauthorized, "invalid refresh token")
 	}
 

@@ -27,7 +27,7 @@ func (h *LogoutHandler) Handle(ctx context.Context, cmd LogoutCmd) error {
 	tokenHash := session.HashToken(cmd.RawToken)
 
 	existing, err := h.sessions.GetByTokenHash(ctx, tokenHash)
-	if err != nil {
+	if err != nil || existing == nil {
 		// Token not found — already logged out, treat as success
 		return nil
 	}

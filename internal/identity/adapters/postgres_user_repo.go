@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/codenogo/pfin/internal/identity/domain/user"
@@ -80,25 +81,9 @@ func (r *PostgresUserRepo) Update(ctx context.Context, u *user.User) error {
 }
 
 func isDuplicateKey(err error) bool {
-	return err != nil && (errors.As(err, new(*pgDuplicateKeyError)) ||
-		// pgx wraps the error; check the error string as fallback
-		containsString(err.Error(), "duplicate key") ||
-		containsString(err.Error(), "23505"))
-}
-
-type pgDuplicateKeyError struct{}
-
-func (e *pgDuplicateKeyError) Error() string { return "duplicate key" }
-
-func containsString(s, substr string) bool {
-	return len(s) >= len(substr) && searchString(s, substr)
-}
-
-func searchString(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		return pgErr.Code == "23505" // unique_violation
 	}
 	return false
 }
