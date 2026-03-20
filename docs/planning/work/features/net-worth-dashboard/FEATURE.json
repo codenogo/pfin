@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "feature": "net-worth-dashboard",
+  "slug": "net-worth-dashboard",
+  "displayName": "Net Worth Dashboard (Reporting Context — Phase 1)",
+  "parentShape": {
+    "initiative": "personal-finance",
+    "path": "docs/planning/work/ideas/personal-finance/SHAPE.json",
+    "timestamp": "2026-03-20T00:00:00Z"
+  },
+  "userOutcome": "Users can see total net worth and track changes over time with Nivo visualizations — household view includes shared + personally-shared accounts",
+  "scopeSummary": "Reporting context phase 1 (internal/reporting/): daily cron snapshots into net_worth_snapshots table, Nivo line/pie charts, scope-aware household aggregation, query handlers only (pure read model)",
+  "dependencies": ["chart-of-accounts", "double-entry-ledger"],
+  "risks": [
+    "Cron job reliability",
+    "Nivo bundle size",
+    "Household net worth aggregation complexity"
+  ],
+  "status": "discuss-ready",
+  "readinessReason": "All blocking decisions resolved: daily cron snapshots, Nivo for charts",
+  "handoffSummary": "Implement internal/reporting/ phase 1: net_worth_snapshots table, daily cron job, query handlers. Next.js dashboard with Nivo line chart (trend), pie chart (breakdown), KPI cards.",
+  "timestamp": "2026-03-20T00:00:00Z"
+}

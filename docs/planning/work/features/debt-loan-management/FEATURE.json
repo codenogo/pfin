@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "feature": "debt-loan-management",
+  "slug": "debt-loan-management",
+  "displayName": "Debt & Loan Management (Debt Context)",
+  "parentShape": {
+    "initiative": "personal-finance",
+    "path": "docs/planning/work/ideas/personal-finance/SHAPE.json",
+    "timestamp": "2026-03-20T00:00:00Z"
+  },
+  "userOutcome": "Users can track loans with amortization schedules, auto-split payments into principal vs interest, compare payoff strategies (snowball/avalanche/hybrid/custom), and run what-if scenarios",
+  "scopeSummary": "Debt context (internal/debt/): Loan aggregate with amortization schedule, auto-split payments as split journal entries, four payoff strategies side-by-side, what-if scenarios, upcoming payments dashboard, dual-scope",
+  "dependencies": ["chart-of-accounts", "double-entry-ledger"],
+  "risks": [
+    "Amortization accuracy with variable rates and extra payments",
+    "Auto-split sync with actual payments",
+    "Payoff strategy computation with many loans",
+    "What-if UI responsiveness"
+  ],
+  "status": "discuss-ready",
+  "readinessReason": "All decisions resolved: full debt suite, auto-split, all four strategies, own bounded context",
+  "handoffSummary": "Implement internal/debt/: Loan aggregate, amortization generator, auto-split payment service (split journal entries), payoff engine (snowball/avalanche/hybrid/custom), what-if calculator, upcoming payments query. Next.js: debt dashboard, amortization table, strategy comparison, what-if simulator.",
+  "timestamp": "2026-03-20T00:00:00Z"
+}

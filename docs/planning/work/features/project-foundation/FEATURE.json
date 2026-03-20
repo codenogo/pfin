@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "feature": "project-foundation",
+  "slug": "project-foundation",
+  "displayName": "Project Foundation & Shared Kernel",
+  "parentShape": {
+    "initiative": "personal-finance",
+    "path": "docs/planning/work/ideas/personal-finance/SHAPE.json",
+    "timestamp": "2026-03-20T00:00:00Z"
+  },
+  "userOutcome": "Development team has a working Go project scaffold with DDD structure, shared value objects, event bus, database connectivity, and CI pipeline",
+  "scopeSummary": "Go module, DDD directory structure, shared kernel (Money, Currency, Scope, DomainError), custom event bus (sync+async), pgx v5 pool, golang-migrate, chi v5 router with middleware chain, Docker Compose, Makefile",
+  "dependencies": [],
+  "risks": [
+    "DDD structure must be right from the start",
+    "Event bus design must support sync and async from day one",
+    "Shared kernel must be minimal"
+  ],
+  "status": "discuss-ready",
+  "readinessReason": "All 3 architecture research docs provide complete project structure, code patterns, and library choices",
+  "handoffSummary": "Scaffold Go module with DDD directory layout. Implement: pkg/money, pkg/scope, pkg/errs, internal/common/event (Bus, AsyncBus, CompositePublisher). Set up pgx v5, golang-migrate, chi v5 router with middleware chain. Docker Compose with PostgreSQL 16. Makefile. Manual DI wiring in cmd/api/main.go.",
+  "timestamp": "2026-03-20T00:00:00Z"
+}

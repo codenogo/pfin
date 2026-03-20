@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "feature": "household-management",
+  "slug": "household-management",
+  "displayName": "Household Management (Household Context)",
+  "parentShape": {
+    "initiative": "personal-finance",
+    "path": "docs/planning/work/ideas/personal-finance/SHAPE.json",
+    "timestamp": "2026-03-20T00:00:00Z"
+  },
+  "userOutcome": "Users can create households, invite members by email, assign roles, and switch between personal and household contexts. Solo users have zero overhead.",
+  "scopeSummary": "Household bounded context (internal/household/): Household aggregate root (Members as child entities, Role value object, invariants: exactly one owner, max 10 members), Invitation separate aggregate (token lifecycle). Command handlers, HouseholdContext middleware, permission matrix, token-based email invitation, audit log, domain events. Next.js household switcher.",
+  "dependencies": ["auth-user-management"],
+  "risks": [
+    "Permission model complexity — 4 roles x 15+ actions",
+    "Invitation flow edge cases",
+    "Every downstream query must use HouseholdContext middleware",
+    "Household aggregate invariants must be enforced at domain level"
+  ],
+  "status": "discuss-ready",
+  "readinessReason": "Research provides complete schema, permission matrix, middleware patterns, UX flows, and DDD aggregate design with invariants.",
+  "handoffSummary": "Implement internal/household/ bounded context: Household aggregate with Members + Role value object, Invitation aggregate. Command handlers. HouseholdContext middleware. Permission enforcement. Audit log. Domain events (MemberAccepted triggers cross-context category seeding). Next.js household switcher + member management.",
+  "timestamp": "2026-03-20T00:00:00Z"
+}

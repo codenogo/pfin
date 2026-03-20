@@ -1,0 +1,223 @@
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "60"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 3000,
+            "command": "ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); if [ -f \"$ROOT/.cnogo/hooks/hook-dangerous-cmd.sh\" ]; then bash \"$ROOT/.cnogo/hooks/hook-dangerous-cmd.sh\"; else exit 0; fi",
+            "_cnogo": true
+          },
+          {
+            "type": "command",
+            "timeout": 3000,
+            "command": "ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); if [ -f \"$ROOT/.cnogo/hooks/hook-pre-commit-secrets.sh\" ]; then bash \"$ROOT/.cnogo/hooks/hook-pre-commit-secrets.sh\"; else exit 0; fi",
+            "_cnogo": true
+          },
+          {
+            "type": "command",
+            "timeout": 3000,
+            "command": "ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); if [ -f \"$ROOT/.cnogo/scripts/workflow_hooks.py\" ]; then python3 \"$ROOT/.cnogo/scripts/workflow_hooks.py\" pre_bash; else exit 0; fi",
+            "_cnogo": true
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 2000,
+            "command": "ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); if [ -f \"$ROOT/.cnogo/hooks/hook-sensitive-file.sh\" ]; then bash \"$ROOT/.cnogo/hooks/hook-sensitive-file.sh\"; else exit 0; fi",
+            "_cnogo": true
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .cnogo/hooks/hook-subagent-stop.py",
+            "_cnogo": true
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .cnogo/hooks/hook-pre-compact.py",
+            "_cnogo": true
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); if [ -f \"$ROOT/.cnogo/scripts/workflow_hooks.py\" ]; then python3 \"$ROOT/.cnogo/scripts/workflow_hooks.py\" post_edit; else exit 0; fi",
+            "_cnogo": true
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); if [ -f \"$ROOT/.cnogo/hooks/hook-commit-confirm.sh\" ]; then bash \"$ROOT/.cnogo/hooks/hook-commit-confirm.sh\"; else exit 0; fi",
+            "_cnogo": true
+          },
+          {
+            "type": "command",
+            "timeout": 10000,
+            "command": "ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd); if [ -f \"$ROOT/.cnogo/hooks/hook-post-commit-graph.sh\" ]; then bash \"$ROOT/.cnogo/hooks/hook-post-commit-graph.sh\"; else exit 0; fi",
+            "_cnogo": true
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Edit",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git checkout:*)",
+      "Bash(git branch:*)",
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git stash:*)",
+      "Bash(git fetch:*)",
+      "Bash(git pull:*)",
+      "Bash(git merge:*)",
+      "Bash(git rebase:*)",
+      "Bash(git tag:*)",
+      "Bash(git worktree:*)",
+      "Bash(gh:*)",
+      "Bash(mvn:*)",
+      "Bash(gradle:*)",
+      "Bash(./gradlew:*)",
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(yarn:*)",
+      "Bash(pnpm:*)",
+      "Bash(node:*)",
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(pip:*)",
+      "Bash(pip3:*)",
+      "Bash(pytest:*)",
+      "Bash(black:*)",
+      "Bash(isort:*)",
+      "Bash(ruff:*)",
+      "Bash(go:*)",
+      "Bash(gofmt:*)",
+      "Bash(goimports:*)",
+      "Bash(cargo:*)",
+      "Bash(rustfmt:*)",
+      "Bash(docker:*)",
+      "Bash(docker-compose:*)",
+      "Bash(kubectl:*)",
+      "Bash(helm:*)",
+      "Bash(terraform:*)",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(ag:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(sort:*)",
+      "Bash(uniq:*)",
+      "Bash(sed:*)",
+      "Bash(awk:*)",
+      "Bash(jq:*)",
+      "Bash(yq:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(touch:*)",
+      "Bash(date:*)",
+      "Bash(echo:*)",
+      "Bash(printf:*)",
+      "Bash(chmod:*)",
+      "Bash(tree:*)",
+      "Bash(diff:*)",
+      "Bash(which:*)",
+      "Bash(env:*)",
+      "Bash(rm:*)",
+      "Bash(./.cnogo/scripts/*)",
+      "Bash(./.cnogo/hooks/*)",
+      "Bash($HOME/.claude/scripts/*)"
+    ],
+    "deny": [
+      "Bash(rm -rf /*)",
+      "Bash(rm -rf ~/*)",
+      "Bash(rm -rf /)",
+      "Bash(sudo:*)",
+      "Bash(chmod 777:*)",
+      "Bash(chmod -R 777:*)",
+      "Bash(curl *|sh)",
+      "Bash(curl *|bash)",
+      "Bash(wget *|sh)",
+      "Bash(wget *|bash)",
+      "Bash(rm -rf .:*)",
+      "Bash(rm -rf ..:*)",
+      "Bash(rm -rf .git:*)",
+      "Bash(cat .env:*)",
+      "Bash(cat .env.*:*)",
+      "Bash(head .env:*)",
+      "Bash(tail .env:*)",
+      "Bash(cat *credentials*:*)",
+      "Bash(cat *.pem:*)",
+      "Bash(cat *.key:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push origin --delete:*)",
+      "Bash(docker run --privileged:*)",
+      "Bash(terraform destroy:*)",
+      "Bash(terraform apply -auto-approve:*)",
+      "Bash(kubectl delete namespace:*)",
+      "Bash(curl -X POST -d:*)",
+      "Bash(curl --data:*)",
+      "Bash(wget --post-file:*)",
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/application-prod.yml)",
+      "Read(**/application-prod.yaml)",
+      "Read(**/application-prod.properties)",
+      "Read(**/*-prod.json)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/*_rsa)",
+      "Read(**/*_dsa)",
+      "Read(**/*_ecdsa)",
+      "Read(**/*_ed25519)",
+      "Read(**/.ssh/*)",
+      "Read(**/.aws/credentials)",
+      "Read(**/.kube/config)"
+    ]
+  }
+}

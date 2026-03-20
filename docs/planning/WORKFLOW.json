@@ -1,0 +1,122 @@
+{
+  "agentTeams": {
+    "defaultCompositions": {
+      "debug": [
+        "debugger",
+        "debugger",
+        "debugger"
+      ],
+      "fullstack": [
+        "test-writer",
+        "debugger",
+        "docs-writer",
+        "refactorer"
+      ],
+      "review": [
+        "code-reviewer",
+        "security-scanner",
+        "perf-analyzer"
+      ]
+    },
+    "delegateMode": true,
+    "enabled": true,
+    "maxTakeoversPerTask": 2,
+    "staleIndicatorMinutes": 10
+  },
+  "enforcement": {
+    "monorepoVerifyScope": "warn",
+    "operatingPrinciples": "warn",
+    "taskOwnership": "error",
+    "tddMode": "error",
+    "twoStageReview": "error",
+    "verificationBeforeCompletion": "error"
+  },
+  "entropy": {
+    "enabled": true,
+    "maxFilesPerTask": 3,
+    "maxTasksPerRun": 3,
+    "mode": "background"
+  },
+  "freshness": {
+    "contextMaxAgeDays": 30,
+    "enabled": true,
+    "planMaxAgeDaysWithoutSummary": 14,
+    "summaryMaxAgeDaysWithoutReview": 7
+  },
+  "invariants": {
+    "enabled": true,
+    "forbiddenImportPatterns": [
+      {
+        "message": "Avoid wildcard imports.",
+        "mode": "regex",
+        "pattern": "^\\s*from\\s+\\S+\\s+import\\s+\\*",
+        "severity": "warn"
+      }
+    ],
+    "maxFileLines": 800,
+    "maxFileLinesExceptions": [
+      ".cnogo/scripts/workflow_checks_core.py",
+      ".cnogo/scripts/workflow_validate_core.py"
+    ],
+    "maxLineLength": 140,
+    "pythonBareExcept": "warn",
+    "scanScope": "changed",
+    "todoRequiresTicket": true
+  },
+  "packages": [],
+  "performance": {
+    "bootstrapContext": {
+      "commandSetWordMax": 7000,
+      "enabled": true,
+      "rootClaudeWordMax": 500,
+      "workflowClaudeWordMax": 450
+    },
+    "changedFilesFallback": "none",
+    "checkScope": "auto",
+    "commandTimeoutSec": 300,
+    "hookOptimization": {
+      "enabled": true,
+      "logFile": ".cnogo/command-usage.jsonl",
+      "mode": "suggest",
+      "showSuggestions": true
+    },
+    "outputCompaction": {
+      "dedupe": true,
+      "enabled": true,
+      "failTailLines": 80,
+      "maxLines": 120,
+      "passLines": 30
+    },
+    "outputRecovery": {
+      "directory": ".cnogo/tee",
+      "enabled": true,
+      "maxFileSize": 1048576,
+      "maxFiles": 20,
+      "minChars": 500,
+      "mode": "failures"
+    },
+    "postEditFormat": "auto",
+    "postEditFormatScope": "changed",
+    "tokenBudgets": {
+      "brainstormWordMax": 1400,
+      "commandWordMax": 400,
+      "commandsTotalWordMax": 8000,
+      "contextWordMax": 1300,
+      "enabled": true,
+      "planWordMax": 1200,
+      "researchWordMax": 2200,
+      "reviewWordMax": 1400,
+      "shapeWordMax": 1600,
+      "summaryWordMax": 900
+    },
+    "tokenTelemetry": {
+      "enabled": true
+    }
+  },
+  "repoShape": "single",
+  "research": {
+    "minSources": 3,
+    "mode": "auto"
+  },
+  "version": 1
+}

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "feature": "auth-user-management",
+  "slug": "auth-user-management",
+  "displayName": "Auth & User Management (Identity Context)",
+  "parentShape": {
+    "initiative": "personal-finance",
+    "path": "docs/planning/work/ideas/personal-finance/SHAPE.json",
+    "timestamp": "2026-03-20T00:00:00Z"
+  },
+  "userOutcome": "Users can sign up, log in, manage their profile, and have secure sessions",
+  "scopeSummary": "Identity bounded context (internal/identity/): User entity, Credentials value object, Register + Authenticate command handlers, PostgreSQL user repo (pgx v5), JWT access+refresh tokens, bcrypt hashing, rate limiting, domain events (UserRegistered, UserVerified, PasswordChanged). Next.js login/register/profile pages.",
+  "dependencies": ["project-foundation"],
+  "risks": [
+    "Auth is security-critical — must get right from the start",
+    "Session management complexity (refresh tokens, revocation)",
+    "JWT secret management and rotation strategy"
+  ],
+  "status": "discuss-ready",
+  "readinessReason": "Well-understood generic subdomain. DDD research provides Identity context structure, Go architecture research provides middleware and JWT patterns.",
+  "handoffSummary": "Implement internal/identity/ bounded context: User aggregate, Register + Authenticate command handlers, PostgreSQL user repository, HTTP handlers. JWT middleware in internal/common/auth. Emit UserRegistered domain event. Rate limiting. Next.js auth pages.",
+  "timestamp": "2026-03-20T00:00:00Z"
+}

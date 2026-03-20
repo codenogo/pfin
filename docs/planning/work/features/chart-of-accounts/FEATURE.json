@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "feature": "chart-of-accounts",
+  "slug": "chart-of-accounts",
+  "displayName": "Chart of Accounts & Wallets (Accounting Context — Phase 1)",
+  "parentShape": {
+    "initiative": "personal-finance",
+    "path": "docs/planning/work/ideas/personal-finance/SHAPE.json",
+    "timestamp": "2026-03-20T00:00:00Z"
+  },
+  "userOutcome": "Users can create and manage financial accounts (wallets) built on the five accounting types",
+  "scopeSummary": "Accounting context phase 1 (internal/accounting/domain/account/): Account aggregate root with AccountCategory, AccountSubtype, Currency value objects. IsWallet() domain method. Dual-scope via Scope shared kernel. CreateAccount + ArchiveAccount commands. PostgreSQL accounts table with CHECK constraints. System account seeding on UserRegistered event. Dual API: /accounts + /wallets. Personal→household sharing.",
+  "dependencies": ["auth-user-management", "household-management"],
+  "risks": [
+    "Account type taxonomy must be extensible",
+    "System account seeding must match accounting conventions",
+    "Dual-scope CHECK constraints at DB level",
+    "Account aggregate boundary must be clean — JournalEntry references by ID only"
+  ],
+  "status": "discuss-ready",
+  "readinessReason": "Research provides complete schema, Go domain model, repository interfaces, and API design.",
+  "handoffSummary": "Implement internal/accounting/domain/account: Account aggregate root with value objects. Commands, PostgreSQL repo with dual-scope. System account seeding via UserRegistered event. Dual API endpoints. Next.js wallet list + forms.",
+  "timestamp": "2026-03-20T00:00:00Z"
+}

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "feature": "budget-system",
+  "slug": "budget-system",
+  "displayName": "Budget System (Budgeting Context)",
+  "parentShape": {
+    "initiative": "personal-finance",
+    "path": "docs/planning/work/ideas/personal-finance/SHAPE.json",
+    "timestamp": "2026-03-20T00:00:00Z"
+  },
+  "userOutcome": "Users can set monthly budgets per category, see real-time progress, get email alerts at thresholds, and optionally roll unused amounts forward",
+  "scopeSummary": "Budgeting context (internal/budgeting/): Budget aggregate with Allocations, monthly periods, optional rollover per category, JournalEntryRecorded event subscription, in-app + email alerts (Resend), dual-scope",
+  "dependencies": ["double-entry-ledger"],
+  "risks": [
+    "Cross-context event subscription reliability",
+    "Rollover calculation at period boundary",
+    "Email alert delivery requires Resend integration"
+  ],
+  "status": "discuss-ready",
+  "readinessReason": "All blocking decisions resolved: monthly periods, optional rollover per category, in-app + email alerts via Resend",
+  "handoffSummary": "Implement internal/budgeting/: Budget aggregate with Allocations, monthly period logic, per-category rollover. Subscribe to JournalEntryRecorded. Threshold handler emitting BudgetThresholdReached. Nivo progress charts. Email via Resend.",
+  "timestamp": "2026-03-20T00:00:00Z"
+}

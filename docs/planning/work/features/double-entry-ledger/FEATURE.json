@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "feature": "double-entry-ledger",
+  "slug": "double-entry-ledger",
+  "displayName": "Double-Entry Ledger (Accounting Context — Phase 2)",
+  "parentShape": {
+    "initiative": "personal-finance",
+    "path": "docs/planning/work/ideas/personal-finance/SHAPE.json",
+    "timestamp": "2026-03-20T00:00:00Z"
+  },
+  "userOutcome": "Users can record income, expenses, and transfers with full double-entry integrity — simple transaction form in UI, balanced journal entries underneath",
+  "scopeSummary": "Accounting context phase 2 (internal/accounting/domain/entry/): JournalEntry aggregate root with JournalLine child entities, EntryStatus value object. Invariant: SUM(lines.amount) = 0. Factory methods (NewExpense/NewTransfer/NewIncome). Void() via reversal. CQRS: RecordTransaction command + AccountLedger/TrialBalance queries. Event-driven: JournalEntryRecorded (sync: balance projection, async: outbox for budget checks). PostgreSQL outbox. Dual API. Next.js transaction form + ledger view.",
+  "dependencies": ["chart-of-accounts"],
+  "risks": [
+    "Running balance at scale",
+    "Immutability pattern complexity",
+    "Deferred constraint trigger testing",
+    "Dual API surface sync",
+    "Event bus integration (sync + async)"
+  ],
+  "status": "discuss-ready",
+  "readinessReason": "Research provides complete schema, JournalEntry aggregate with factories, repository interfaces, CQRS handlers, event catalog, and PostgreSQL patterns.",
+  "handoffSummary": "Implement internal/accounting/domain/entry: JournalEntry aggregate with Lines, Validate(), factories, Void(). CQRS command/query handlers. PostgreSQL repos with constraint triggers, materialized views. Event-driven balance projection + outbox. Dual API. Categories table. Next.js transaction form + ledger view.",
+  "timestamp": "2026-03-20T00:00:00Z"
+}

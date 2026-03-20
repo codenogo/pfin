@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "repoShape": "auto",
+  "performance": {
+    "postEditFormat": "auto",
+    "postEditFormatScope": "changed",
+    "checkScope": "auto",
+    "changedFilesFallback": "none",
+    "commandTimeoutSec": 300,
+    "outputCompaction": {
+      "enabled": true,
+      "maxLines": 120,
+      "failTailLines": 80,
+      "passLines": 30,
+      "dedupe": true
+    },
+    "outputRecovery": {
+      "enabled": true,
+      "mode": "failures",
+      "minChars": 500,
+      "maxFiles": 20,
+      "maxFileSize": 1048576,
+      "directory": ".cnogo/tee"
+    },
+    "tokenTelemetry": {
+      "enabled": true
+    },
+    "hookOptimization": {
+      "enabled": true,
+      "mode": "suggest",
+      "showSuggestions": true,
+      "logFile": ".cnogo/command-usage.jsonl"
+    },
+    "bootstrapContext": {
+      "enabled": true,
+      "rootClaudeWordMax": 500,
+      "workflowClaudeWordMax": 450,
+      "commandSetWordMax": 7000
+    },
+    "tokenBudgets": {
+      "enabled": true,
+      "commandWordMax": 400,
+      "commandsTotalWordMax": 8000,
+      "contextWordMax": 1300,
+      "planWordMax": 1200,
+      "summaryWordMax": 900,
+      "reviewWordMax": 1400,
+      "researchWordMax": 2200,
+      "shapeWordMax": 1600,
+      "brainstormWordMax": 1400
+    }
+  },
+  "research": {
+    "mode": "auto",
+    "minSources": 3
+  },
+  "enforcement": {
+    "monorepoVerifyScope": "warn",
+    "operatingPrinciples": "warn",
+    "tddMode": "error",
+    "verificationBeforeCompletion": "error",
+    "twoStageReview": "error",
+    "taskOwnership": "error"
+  },
+  "freshness": {
+    "enabled": true,
+    "contextMaxAgeDays": 30,
+    "planMaxAgeDaysWithoutSummary": 14,
+    "summaryMaxAgeDaysWithoutReview": 7
+  },
+  "invariants": {
+    "enabled": true,
+    "scanScope": "changed",
+    "maxFileLines": 800,
+    "maxFileLinesExceptions": [
+      ".cnogo/scripts/workflow_checks_core.py",
+      ".cnogo/scripts/workflow_validate_core.py"
+    ],
+    "maxLineLength": 140,
+    "todoRequiresTicket": true,
+    "pythonBareExcept": "warn",
+    "forbiddenImportPatterns": [
+      {
+        "pattern": "^\\s*from\\s+\\S+\\s+import\\s+\\*",
+        "mode": "regex",
+        "severity": "warn",
+        "message": "Avoid wildcard imports."
+      }
+    ]
+  },
+  "entropy": {
+    "enabled": true,
+    "mode": "background",
+    "maxFilesPerTask": 3,
+    "maxTasksPerRun": 3
+  },
+  "packages": [],
+  "agentTeams": {
+    "enabled": true,
+    "delegateMode": true,
+    "staleIndicatorMinutes": 10,
+    "maxTakeoversPerTask": 2,
+    "defaultCompositions": {
+      "review": ["code-reviewer", "security-scanner", "perf-analyzer"],
+      "fullstack": ["test-writer", "debugger", "docs-writer", "refactorer"],
+      "debug": ["debugger", "debugger", "debugger"]
+    }
+  }
+}

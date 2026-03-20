@@ -1,0 +1,437 @@
+{
+  "schemaVersion": 1,
+  "initiative": "Personal Finance Platform",
+  "slug": "personal-finance",
+  "problem": "People lack a unified, performant tool to track expenses, manage budgets, monitor net worth, and follow investments — with proper accounting rigor, household collaboration, and wallet-based UX. Existing tools are fragmented, lack double-entry integrity, or force single-user silos.",
+  "constraints": [
+    "Full double-entry accounting internally — every transaction is a balanced journal entry",
+    "Dual-scope model: personal (solo) + household (shared) — built from day one",
+    "Wallet = Account — no separate entity, wallets are a UX layer over the chart of accounts",
+    "Financial accuracy: shopspring/decimal in Go, NUMERIC(19,4) in PostgreSQL, never floats",
+    "Immutable ledger: no UPDATE/DELETE on journal entries, corrections via voiding + reversal",
+    "Security-first: encryption at rest, tenant isolation, audit trail on all financial mutations",
+    "Multi-tenant from day one (general public target)",
+    "Go backend + Next.js/React frontend + PostgreSQL",
+    "Data ingestion strategy (bank sync vs manual) deferred — architecture supports both",
+    "Monetization model deferred — architecture agnostic to SaaS vs self-host"
+  ],
+  "globalDecisions": [
+    {
+      "decision": "Go backend with clean architecture (handlers → services → repositories)",
+      "rationale": "High concurrency, low memory footprint, strong stdlib, proven in fintech",
+      "date": "2026-03-20"
+    },
+    {
+      "decision": "PostgreSQL as primary datastore",
+      "rationale": "Relational model fits financial records, ACID guarantees, mature ecosystem",
+      "date": "2026-03-20"
+    },
+    {
+      "decision": "Next.js (React, TypeScript) frontend",
+      "rationale": "SSR for performance, strong typing, large ecosystem, good DX",
+      "date": "2026-03-20"
+    },
+    {
+      "decision": "REST API with OpenAPI spec — dual API surface",
+      "rationale": "Simplified /transactions for normal users + /journal-entries for power users. Same data underneath.",
+      "date": "2026-03-20"
+    },
+    {
+      "decision": "JWT-based authentication with household context via X-Household-ID header",
+      "rationale": "Stateless auth + explicit tenant scope in every request",
+      "date": "2026-03-20"
+    },
+    {
+      "decision": "Full double-entry accounting",
+      "rationale": "Research confirms: incremental cost is one extra table + one validation rule. Benefits: native transfers, derived balances, trial balance integrity, structural audit trail. All major open-source finance apps use this model.",
+      "date": "2026-03-20"
+    },
+    {
+      "decision": "Wallet IS an Account (no separate wallets table)",
+      "rationale": "Research confirms: no major finance app separates wallets from accounts. A wallet is an account where category IN (asset, liability) AND is_visible = TRUE. API can expose /wallets as convenience endpoint over /accounts.",
+      "date": "2026-03-20"
+    },
+    {
+      "decision": "Dual-scope model for personal + household",
+      "rationale": "Every entity has scope = personal (user_id) or household (household_id). Solo users have zero household overhead — household switcher only appears after creating/joining one. Built from day one to avoid painful migration.",
+      "date": "2026-03-20"
+    },
+    {
+      "decision": "Four household roles: owner, admin, member, viewer",
+      "rationale": "Covers couples (owner+admin), families (members), and advisory relationships (viewer). Based on analysis of Monarch Money, YNAB, Splitwise.",
+      "date": "2026-03-20"
+    },
+    {
+      "decision": "shopspring/decimal for Go monetary arithmetic",
+      "rationale": "De facto standard, exact decimal math, implements sql.Scanner and driver.Valuer for pgx",
+      "date": "2026-03-20"
+    },
+    {
+      "decision": "Multi-currency: schema columns from day one, conversion logic deferred to v2",
+      "rationale": "Add currency field on accounts + optional foreign_amount/foreign_currency on journal lines. No conversion logic yet.",
+      "date": "2026-03-20"
+    },
+    {
+      "decision": "DDD with 7 bounded contexts: Accounting (core), Budgeting (core), Identity (generic), Household (supporting), Portfolio (supporting), Reporting (supporting), Import (generic)",
+      "rationale": "Strategic DDD analysis. Accounting and Budgeting are core domains (competitive differentiator). Identity is generic (replaceable). Each context has own ubiquitous language, aggregate boundaries, and package.",
+      "date": "2026-03-20"
+    },
+    {
+      "decision": "Modular monolith with bounded context per top-level package under internal/",
+      "rationale": "Clean architecture + hexagonal (ports & adapters). Each context has domain/app/adapters/ports layers. Go import rules enforce context boundaries. Can extract to microservices later.",
+      "date": "2026-03-20"
+    },
+    {
+      "decision": "Event-inspired architecture (NOT full event sourcing)",
+      "rationale": "Double-entry journal IS already the event log. Domain events emitted on state changes for loose coupling. Custom sync+async event bus (~300 lines Go). PostgreSQL outbox pattern. No Kafka/NATS needed.",
+      "date": "2026-03-20"
+    },
+    {
+      "decision": "CQRS-lite: separate command handlers and query handlers within PostgreSQL",
+      "rationale": "Write path = journal entries (strict, balanced). Read path = materialized views, reports (flexible). No separate read database needed at pfin's scale.",
+      "date": "2026-03-20"
+    },
+    {
+      "decision": "Constructor injection, manual wiring in cmd/api/main.go",
+      "rationale": "No DI framework. Compile-time safety. ~10-15 services at v1. Consider google/wire if it grows past 30+.",
+      "date": "2026-03-20"
+    },
+    {
+      "decision": "Core Go libraries: pgx v5, chi v5, shopspring/decimal, golang-jwt, golang-migrate, testcontainers-go",
+      "rationale": "Production-proven, net/http compatible, no ORMs (need precise SQL control for accounting). Explicitly avoid GORM, testify, viper, uber-go/fx, gin.",
+      "date": "2026-03-20"
+    }
+  ],
+  "researchRefs": [
+    {
+      "slug": "double-entry-accounting-architecture",
+      "path": "docs/planning/work/research/double-entry-accounting-architecture.md",
+      "summary": "Full double-entry architecture: schema, Go patterns, PostgreSQL strategies, open-source analysis. Recommends journal_entries + journal_lines model with NUMERIC(19,4), deferred constraint triggers, and materialized balance views."
+    },
+    {
+      "slug": "household-family-finance-architecture",
+      "path": "docs/planning/work/research/household-family-finance-architecture.md",
+      "summary": "Dual-scope model (personal + household), four roles, invitation flow, permission matrix, scope-aware middleware, UX patterns. Analyzed Monarch Money, YNAB, Splitwise."
+    },
+    {
+      "slug": "wallet-system-architecture",
+      "path": "docs/planning/work/research/wallet-system-architecture.md",
+      "summary": "Wallet = Account. No separate entity. Presentation metadata (icon, color, display_order) on accounts table. Materialized balances. Go domain model with IsWallet() helper."
+    },
+    {
+      "slug": "ddd-architecture-go-personal-finance",
+      "path": "docs/planning/work/research/ddd-architecture-go-personal-finance.md",
+      "summary": "DDD strategic + tactical design. 7 bounded contexts, context mapping, aggregate designs (Account, JournalEntry+Lines, Household+Members, Budget+Allocations), value objects (Money, Currency, Scope), repository pattern with ThreeDotsLabs UpdateFn, Go project structure. 2405 lines."
+    },
+    {
+      "slug": "event-driven-architecture",
+      "path": "docs/planning/work/research/event-driven-architecture.md",
+      "summary": "Event-inspired NOT full event sourcing. Double-entry journal IS the event log. Custom sync+async event bus, CQRS-lite, PostgreSQL outbox pattern, 30+ domain events cataloged, 4-phase implementation plan. 1742 lines."
+    },
+    {
+      "slug": "go-architecture-patterns",
+      "path": "docs/planning/work/research/go-architecture-patterns.md",
+      "summary": "Clean architecture + hexagonal + modular monolith in Go. DI patterns, error handling, testing (testcontainers-go), middleware chain (chi), project structure, library recommendations (pgx, chi, shopspring/decimal). 2938 lines."
+    }
+  ],
+  "openQuestions": [],
+  "candidateFeatures": [
+    {
+      "slug": "project-foundation",
+      "displayName": "Project Foundation & Shared Kernel",
+      "userOutcome": "Development team has a working Go project scaffold with DDD structure, shared value objects, event bus, database connectivity, and CI pipeline",
+      "scopeSummary": "Go module init, DDD directory structure (cmd/api, internal/{accounting,household,identity,budgeting,portfolio,reporting,importing}, pkg/{scope,money,currency,errs}), shared kernel value objects (Money, Currency, Scope, AccountID), custom event bus (sync+async composite, ~300 lines), PostgreSQL connection pool (pgx v5), database migration framework (golang-migrate), chi router skeleton with middleware chain (RequestID, Logger, Recovery, CORS, RateLimit), typed DomainError with codes mapped to HTTP status, config loading from env vars, Makefile (build/test/lint/migrate/docker), Docker Compose for local PostgreSQL, initial migration files for extensions (pgcrypto, pg_trgm)",
+      "dependencies": [],
+      "risks": [
+        "DDD structure must be right from the start — restructuring bounded context packages later is painful",
+        "Event bus design must support both sync (balance projections) and async (notifications) from day one",
+        "Shared kernel (pkg/) must be minimal — over-sharing breaks context boundaries"
+      ],
+      "status": "discuss-ready",
+      "readinessReason": "All 3 architecture research docs provide complete project structure, code patterns, and library choices. No open questions.",
+      "handoffSummary": "Scaffold Go module with DDD directory layout per research docs. Implement: pkg/money (shopspring/decimal wrapper, immutable, Currency-aware), pkg/scope (Personal/Household enum with user_id/household_id), pkg/errs (typed DomainError with codes). Build internal/common/event (Bus, AsyncBus, CompositePublisher). Set up pgx v5 pool, golang-migrate, chi v5 router with middleware chain. Docker Compose with PostgreSQL 16. Makefile. Manual DI wiring in cmd/api/main.go."
+    },
+    {
+      "slug": "auth-user-management",
+      "displayName": "Auth & User Management (Identity Context)",
+      "userOutcome": "Users can sign up, log in, manage their profile, and have secure sessions",
+      "scopeSummary": "Identity bounded context: internal/identity/ with domain/user (User entity, Credentials value object), app/command (Register, Authenticate, ResetPassword), adapters/postgres_user_repo, ports/http. Users table migration. bcrypt password hashing. JWT access+refresh tokens (golang-jwt). Rate limiting middleware (x/time/rate). Domain events: UserRegistered, UserVerified, PasswordChanged. Next.js login/register/profile pages.",
+      "dependencies": ["project-foundation"],
+      "risks": [
+        "Auth is security-critical — must get right from the start",
+        "Session management complexity (refresh tokens, revocation)",
+        "JWT secret management and rotation strategy"
+      ],
+      "status": "discuss-ready",
+      "readinessReason": "Well-understood generic subdomain. DDD research provides Identity context structure, Go architecture research provides middleware and JWT patterns.",
+      "handoffSummary": "Implement internal/identity/ bounded context: User aggregate (entity + Credentials value object), Register + Authenticate command handlers, PostgreSQL user repository (pgx v5), HTTP handlers with chi. JWT middleware in internal/common/auth. Emit UserRegistered domain event on signup. Rate limiting on auth endpoints. Next.js pages: login, register, profile, password reset."
+    },
+    {
+      "slug": "household-management",
+      "displayName": "Household Management (Household Context)",
+      "userOutcome": "Users can create households, invite members by email, assign roles, and switch between personal and household contexts. Solo users have zero overhead.",
+      "scopeSummary": "Household bounded context: internal/household/ with domain/household (Household aggregate root with Members as child entities, Invitation separate aggregate, Role value object (owner/admin/member/viewer)). Invariants: exactly one owner, max 10 members, no duplicate invites. App layer: CreateHousehold, InviteMember, AcceptInvitation, ChangeMemberRole, RemoveMember commands. HouseholdContext middleware (X-Household-ID header extraction, role verification). Permission matrix (4 roles × 15+ actions) enforced in service layer. Token-based email invitation (7-day expiry). Audit log for shared actions. Domain events: HouseholdCreated, MemberInvited, MemberAccepted, MemberRemoved, RoleChanged. Next.js: household switcher (top-left nav, appears only after first household), invitation accept/decline flow.",
+      "dependencies": ["auth-user-management"],
+      "risks": [
+        "Permission model complexity — 4 roles × 15+ actions",
+        "Invitation flow edge cases (expired tokens, existing vs new users)",
+        "Every downstream feature must use HouseholdContext middleware for scope-aware queries",
+        "Household aggregate invariants (exactly one owner) must be enforced at domain level"
+      ],
+      "status": "discuss-ready",
+      "readinessReason": "Research provides complete schema, permission matrix, middleware patterns, UX flows, and DDD aggregate design with invariants.",
+      "handoffSummary": "Implement internal/household/ bounded context: Household aggregate (root + Member entities + Role value object) with domain invariants. Invitation aggregate with token lifecycle. Command handlers for all member operations. PostgreSQL repos with dual-scope queries. HouseholdContext middleware reading X-Household-ID, verifying membership, injecting role into context. Permission check via rolePermissions map. Audit log table + async event handler. Emit domain events (MemberAccepted triggers category seeding cross-context). Next.js: household switcher component, invitation flow, member management page."
+    },
+    {
+      "slug": "chart-of-accounts",
+      "displayName": "Chart of Accounts & Wallets (Accounting Context — Phase 1)",
+      "userOutcome": "Users can create and manage financial accounts (wallets) — checking, savings, credit cards, cash, e-wallets, loans — built on the five accounting types",
+      "scopeSummary": "First phase of Accounting bounded context: internal/accounting/domain/account (Account aggregate root with AccountCategory enum (asset/liability/equity/income/expense), AccountSubtype enum (checking/savings/credit_card/cash/e_wallet/loan/mortgage/investment), presentation metadata (icon, color, display_order, is_visible), IsWallet() domain method). Dual-scope with Scope value object from shared kernel. CreateAccount + ArchiveAccount command handlers. AccountBalance query handler (reads from materialized view). PostgreSQL accounts table with CHECK constraints enforcing scope exclusivity. System account seeding on UserRegistered event (equity:opening-balances, default expense/income categories). Dual API: /api/v1/accounts (full chart) and /api/v1/wallets (filtered to visible asset+liability). Personal account sharing to household (shared_to_household_id with visibility levels). Domain events: AccountCreated, AccountArchived. Next.js: wallet list (grouped by type), create/edit account form, account detail page.",
+      "dependencies": ["auth-user-management", "household-management"],
+      "risks": [
+        "Account type taxonomy must be extensible for future data imports",
+        "System account seeding must match accounting conventions correctly",
+        "Dual-scope CHECK constraints must be enforced at DB level",
+        "Account aggregate boundary must be clean — JournalEntry references by ID only"
+      ],
+      "status": "discuss-ready",
+      "readinessReason": "Research provides complete schema, Go domain model (Account entity, Category/Subtype value objects), repository interfaces, and API design.",
+      "handoffSummary": "Implement internal/accounting/domain/account: Account aggregate root with Category, Subtype, Currency value objects. IsWallet() domain method. CreateAccount + ArchiveAccount commands with scope validation. PostgreSQL accounts table with dual-scope CHECK constraints, presentation fields, credit_limit. Seed system accounts via UserRegistered event handler. Query handler for account balance (reads materialized view). HTTP handlers with dual endpoints (/accounts + /wallets). Sharing endpoint for personal→household visibility. Next.js wallet list, account forms."
+    },
+    {
+      "slug": "double-entry-ledger",
+      "displayName": "Double-Entry Ledger (Accounting Context — Phase 2)",
+      "userOutcome": "Users can record income, expenses, and transfers with full double-entry integrity — simple transaction form in UI, balanced journal entries underneath",
+      "scopeSummary": "Second phase of Accounting bounded context: internal/accounting/domain/entry (JournalEntry aggregate root with JournalLine child entities, EntryStatus value object (pending/cleared/reconciled/voided)). Aggregate invariant: SUM(lines.amount) = 0, minimum 2 lines, no zero amounts, voided entries immutable. Factory methods: NewExpense, NewTransfer, NewIncome (construct balanced entries from simplified input). Void() method creates reversal entry. App layer: RecordTransaction command handler (CQRS write side — accepts simplified type/from/to, constructs balanced entry, emits JournalEntryRecorded event, updates balance projection synchronously), VoidEntry command handler (creates reversal, emits JournalEntryVoided). Query handlers (CQRS read side): AccountLedger (running balance via window functions), TrialBalance, AccountBalance. PostgreSQL: journal_entries + journal_lines tables with NUMERIC(19,4), deferred constraint trigger for balance enforcement, ON DELETE RESTRICT, covering indexes. Materialized account_balances view refreshed by sync event handler on JournalEntryRecorded. Categories table (hierarchical, dual-scope) with parent_id. Tags (JSONB on journal_entries). Search/filter/sort/pagination. PostgreSQL outbox for async events (BudgetThresholdCheck). Dual API: /api/v1/transactions (simplified: type, amount, from/to) and /api/v1/journal-entries (power user: explicit lines). Next.js: simple transaction form (amount, description, from wallet, category), ledger view per account with running balance, void button.",
+      "dependencies": ["chart-of-accounts"],
+      "risks": [
+        "Running balance computation must be efficient at scale (millions of transactions)",
+        "Immutability pattern (void + reverse) adds complexity vs simple UPDATE",
+        "Deferred constraint trigger for balance enforcement needs careful testing",
+        "Category taxonomy design affects budgets and reports downstream",
+        "Dual API surface (simplified + journal) must stay in sync",
+        "Event bus integration — sync handler for balance, async for budget checks"
+      ],
+      "status": "discuss-ready",
+      "readinessReason": "Research provides complete schema, JournalEntry aggregate with factory methods, repository interfaces (JournalRepository + LedgerReader), PostgreSQL patterns (constraint triggers, materialized views, window functions), CQRS command/query handlers, and event catalog.",
+      "handoffSummary": "Implement internal/accounting/domain/entry: JournalEntry aggregate root with Lines, Validate() using shopspring/decimal, factory methods (NewExpense/NewTransfer/NewIncome), Void() for reversal creation. JournalRepository.CreateEntry wrapping header + lines in single DB transaction with in-DB balance verification. LedgerReader for account ledger (window functions), trial balance. RecordTransaction command handler: validate → construct balanced entry → persist → emit JournalEntryRecorded (sync: update balance projection, async: outbox for budget checks). Materialized account_balances view. Categories table with hierarchy. PostgreSQL outbox table + relay for async events. HTTP handlers with dual API. Next.js: transaction form, ledger view, void action."
+    },
+    {
+      "slug": "budget-system",
+      "displayName": "Budget System (Budgeting Context)",
+      "userOutcome": "Users can set monthly budgets per category, see real-time progress with visual indicators, get email alerts at thresholds, and optionally roll unused amounts forward",
+      "scopeSummary": "Budgeting bounded context: internal/budgeting/ with domain/budget (Budget aggregate root with Allocation child entities). Monthly periods only. Optional rollover per category (toggle on each allocation). Subscribes to JournalEntryRecorded events from Accounting context to update spent tracking. In-app alerts (progress bars: yellow at 80%, red at 100%) plus email alerts via Resend at configurable thresholds. Emits BudgetThresholdReached and BudgetExceeded events. Commands: CreateBudget, UpdateAllocation, ToggleRollover. Queries: BudgetProgress (spent vs allocated per category), BudgetOverview. Dual-scope. Next.js: budget overview dashboard with Nivo progress charts, category allocation editor.",
+      "dependencies": ["double-entry-ledger"],
+      "risks": [
+        "Cross-context event subscription (Accounting → Budgeting) must be reliable via outbox",
+        "Rollover calculation at period boundary needs careful handling",
+        "Email alert delivery requires Resend integration"
+      ],
+      "status": "discuss-ready",
+      "readinessReason": "All blocking decisions resolved: monthly periods, optional rollover per category, in-app + email alerts via Resend. Architecture ready.",
+      "handoffSummary": "Implement internal/budgeting/ bounded context: Budget aggregate with Allocations, monthly period logic, per-category rollover toggle. Subscribe to JournalEntryRecorded for spent tracking. Async threshold handler emitting BudgetThresholdReached. In-app visual indicators (Nivo charts). Email alerts via Resend at 80%/100% thresholds. PostgreSQL budgets + budget_allocations tables with dual-scope. Next.js budget dashboard."
+    },
+    {
+      "slug": "net-worth-dashboard",
+      "displayName": "Net Worth Dashboard (Reporting Context — Phase 1)",
+      "userOutcome": "Users can see total net worth (assets minus liabilities) and track how it changes over time with rich visualizations — household view includes shared + personally-shared accounts",
+      "scopeSummary": "First phase of Reporting bounded context: internal/reporting/. Net worth from account_balances materialized view. Daily cron job snapshots balances into net_worth_snapshots table (midnight run). Scope-aware: household net worth includes shared + personally-shared accounts. Trend visualization with Nivo (line chart, area chart). Breakdown by account type (Nivo pie/bar). Query handlers only (pure read model). Next.js: net worth dashboard page with Nivo charts, time range selector.",
+      "dependencies": ["chart-of-accounts", "double-entry-ledger"],
+      "risks": [
+        "Cron job must be reliable (missed snapshot = gap in history)",
+        "Nivo bundle size impact on frontend",
+        "Household net worth aggregation query complexity"
+      ],
+      "status": "discuss-ready",
+      "readinessReason": "All blocking decisions resolved: daily cron snapshots, Nivo for visualizations. Architecture ready.",
+      "handoffSummary": "Implement internal/reporting/ bounded context (phase 1): net_worth_snapshots table, daily cron job snapshotting account balances, query handlers for net worth (current + historical). Next.js dashboard with Nivo line chart (trend over time), pie chart (breakdown by type), KPI cards (total assets, liabilities, net worth). Scope-aware queries for household view."
+    },
+    {
+      "slug": "investment-portfolio",
+      "displayName": "Investment Portfolio Tracker (Portfolio Context)",
+      "userOutcome": "Users can track holdings with manual price entry, see simple return performance, asset allocation, and dividend income — FIFO cost basis",
+      "scopeSummary": "Portfolio bounded context: internal/portfolio/. Holdings modeled as journal entries (buy/sell on investment accounts). Manual price entry for current values (market data API deferred to v2). FIFO cost basis tracking per lot. Simple return calculation ((current - cost) / cost). Allocation visualization with Nivo pie chart. Dividend tracking as income journal entries. Dual-scope. Commands: AddHolding, RecordSale (FIFO lot matching), UpdatePrice (manual), RecordDividend. Queries: PortfolioSummary, HoldingDetail, AllocationBreakdown.",
+      "dependencies": ["double-entry-ledger"],
+      "risks": [
+        "FIFO lot matching algorithm must be correct for tax reporting",
+        "Manual price entry UX must be simple (batch update screen)",
+        "Performance calculations need thorough testing with edge cases"
+      ],
+      "status": "discuss-ready",
+      "readinessReason": "All blocking decisions resolved: manual prices for v1, FIFO only, simple return. Scope significantly reduced from original draft — achievable.",
+      "handoffSummary": "Implement internal/portfolio/ bounded context: Holdings as journal entries on investment accounts. FIFO lot tracking (lots table with purchase date, quantity, cost_basis). Manual price update (holdings_prices table). Simple return query. Nivo pie chart for allocation. Dividend recording as income entries. Next.js: portfolio dashboard, holding detail, batch price update form."
+    },
+    {
+      "slug": "reporting-analytics",
+      "displayName": "Reporting & Analytics (Reporting Context — Phase 2)",
+      "userOutcome": "Users can generate balance sheets, income statements, trial balances, spending reports, and export to CSV",
+      "scopeSummary": "Extended Reporting context (internal/reporting/): Full accounting reports — trial balance (SUM of all balances = 0), balance sheet (assets vs liabilities vs equity), income statement (income vs expenses for period). Spending by category over time. Per-member breakdowns for households. CSV export for all reports. All read-only query handlers. Next.js: report pages with Nivo charts, date range selectors, CSV download buttons.",
+      "dependencies": ["double-entry-ledger", "budget-system"],
+      "risks": [
+        "Report generation performance at scale (large date ranges with many transactions)",
+        "Household reports need per-member breakdowns (created_by on journal entries)",
+        "Balance sheet correctness depends on proper account categorization"
+      ],
+      "status": "discuss-ready",
+      "readinessReason": "All blocking decisions resolved: full accounting reports, CSV export only. Reports are native to double-entry — mostly query handlers over journal_lines with GROUP BY.",
+      "handoffSummary": "Implement reporting query handlers: TrialBalance (SUM by account, must = 0), BalanceSheet (assets/liabilities/equity at a date), IncomeStatement (income/expenses for date range), SpendingByCategory (GROUP BY category, period). CSV export via Go encoding/csv. Per-member breakdown using created_by FK. Next.js: report pages with Nivo charts, date pickers, export buttons."
+    },
+    {
+      "slug": "data-import-pipeline",
+      "displayName": "Data Import Pipeline (Import Context)",
+      "userOutcome": "Users can import transactions via CSV upload or connect bank accounts for automatic sync",
+      "scopeSummary": "Import bounded context: internal/importing/. CSV parser with column mapping wizard. Bank aggregator integration (Plaid or similar) behind ACL. Transaction deduplication engine. Anti-corruption layer translates external formats into Accounting context commands (RecordTransaction). Import history tracking. Domain events: ImportCompleted, ImportFailed.",
+      "dependencies": ["double-entry-ledger"],
+      "risks": [
+        "Plaid costs and compliance requirements",
+        "CSV format variability across banks",
+        "Deduplication complexity (fuzzy matching)",
+        "ACL must protect Accounting domain from external data format changes"
+      ],
+      "status": "parked",
+      "readinessReason": "Data ingestion strategy explicitly deferred. Architecture ready: Import context with ACL adapter pattern.",
+      "handoffSummary": "TBD — parked pending data ingestion strategy decision. Architecture: Import context with ACL to Accounting, deduplication engine."
+    },
+    {
+      "slug": "debt-loan-management",
+      "displayName": "Debt & Loan Management (Debt Context)",
+      "userOutcome": "Users can track loans with full amortization schedules, see upcoming payments, auto-split payments into principal vs interest, compare payoff strategies (snowball/avalanche/hybrid/custom), and run what-if scenarios for extra payments",
+      "scopeSummary": "Debt bounded context (internal/debt/): Loan aggregate root with amortization schedule (computed from interest_rate, term_months, original_principal, start_date, minimum_payment, due_day_of_month). Auto-split payments: when user records a loan payment, service calculates principal vs interest from amortization schedule and creates split journal entry (debit liability:principal + debit expense:interest, credit asset:checking). Payoff strategies: snowball (smallest balance first), avalanche (highest interest first), hybrid (weighted), custom priority ordering — show all side-by-side with total interest and payoff date comparison. What-if scenarios: extra payment simulation showing time/interest saved. Upcoming payments dashboard: all debts with next due date, minimum payment, remaining balance. Subscribes to journal events for payment reconciliation. Domain events: LoanCreated, PaymentRecorded, LoanPaidOff. Dual-scope. Next.js: debt overview dashboard, loan detail with amortization table, payoff strategy comparison, upcoming payments calendar, what-if calculator.",
+      "dependencies": ["chart-of-accounts", "double-entry-ledger"],
+      "risks": [
+        "Amortization calculation must handle variable-rate loans and extra payments correctly",
+        "Auto-split accuracy depends on amortization schedule staying in sync with actual payments",
+        "Payoff strategy comparison is computationally intensive with many loans",
+        "What-if scenarios need responsive UI for interactive parameter adjustment"
+      ],
+      "status": "discuss-ready",
+      "readinessReason": "All decisions resolved: full debt suite, auto-split payments, all four payoff strategies, own bounded context. Architecture fits naturally — loans are liability accounts with metadata overlay.",
+      "handoffSummary": "Implement internal/debt/ bounded context: Loan aggregate (wraps liability account_id + loan terms: interest_rate, term_months, original_principal, start_date, minimum_payment, due_day_of_month). Amortization schedule generator (standard formula). Auto-split payment service: on RecordLoanPayment command, calculate principal/interest from schedule, create split journal entry via Accounting context. Payoff engine: snowball, avalanche, hybrid, custom — compute total interest + payoff date for each. What-if calculator (extra payment scenarios). Upcoming payments query across all loans. Subscribe to JournalEntryRecorded for payment reconciliation. Next.js: debt dashboard, loan detail + amortization table, strategy comparison page, what-if simulator, upcoming payments view."
+    }
+  ],
+  "recommendedSequence": [
+    "project-foundation",
+    "auth-user-management",
+    "household-management",
+    "chart-of-accounts",
+    "double-entry-ledger",
+    "debt-loan-management",
+    "budget-system",
+    "net-worth-dashboard",
+    "investment-portfolio",
+    "reporting-analytics",
+    "data-import-pipeline"
+  ],
+  "decisionLog": [
+    {
+      "title": "Adopt full double-entry accounting",
+      "decision": "All transactions recorded as balanced journal entries (debits + credits = 0)",
+      "rationale": "Research confirms: incremental cost is modest (1 extra table + 1 rule). Benefits: native transfers, derived balances, trial balance integrity, audit trail. All major finance apps use this.",
+      "date": "2026-03-20"
+    },
+    {
+      "title": "Wallet = Account (no separate entity)",
+      "decision": "Wallets are accounts with category IN (asset, liability) and is_visible = TRUE",
+      "rationale": "Research confirms: no major finance app separates wallets. Single accounts table with presentation metadata. /wallets API is syntactic sugar over /accounts.",
+      "date": "2026-03-20"
+    },
+    {
+      "title": "Dual-scope model from day one",
+      "decision": "Every entity has scope = personal (user_id) or household (household_id), enforced by CHECK constraints",
+      "rationale": "Retrofitting scope-awareness later is painful. Solo users have zero overhead — household UI only appears after creating/joining one.",
+      "date": "2026-03-20"
+    },
+    {
+      "title": "Multi-currency: schema day-one, logic v2",
+      "decision": "Currency field on accounts, optional foreign_amount/foreign_currency on journal lines. No conversion logic yet.",
+      "rationale": "Schema columns are cheap. Conversion logic and exchange rate management is complex and can wait.",
+      "date": "2026-03-20"
+    },
+    {
+      "title": "Defer expense splitting to v2",
+      "decision": "Core household model (shared accounts, roles, budgets) is v1. Splitwise-style splitting is v2.",
+      "rationale": "Splitting adds significant complexity. Core household sharing is sufficient for v1.",
+      "date": "2026-03-20"
+    },
+    {
+      "title": "Defer data ingestion strategy",
+      "decision": "Architecture supports both manual and bank sync, but implementation is parked",
+      "rationale": "User chose to shape core product first",
+      "date": "2026-03-20"
+    },
+    {
+      "title": "Defer monetization model",
+      "decision": "Architecture stays agnostic to SaaS vs self-host",
+      "rationale": "Shape product first, avoid premature infrastructure constraints",
+      "date": "2026-03-20"
+    },
+    {
+      "title": "Budget periods: monthly only",
+      "decision": "Monthly periods only for v1. Weekly/custom deferred.",
+      "rationale": "90% of users want monthly. YNAB, Monarch, Firefly III all default to monthly. Simplest to build.",
+      "date": "2026-03-20"
+    },
+    {
+      "title": "Budget rollover: optional per category",
+      "decision": "Each category can toggle rollover on/off. Unused amount carries forward when enabled.",
+      "rationale": "YNAB-style approach. Gives users control without forcing rollover everywhere.",
+      "date": "2026-03-20"
+    },
+    {
+      "title": "Budget alerts: in-app + email via Resend",
+      "decision": "Visual indicators (yellow 80%, red 100%) plus email alerts at configurable thresholds.",
+      "rationale": "In-app gives immediate feedback. Email catches users who don't check daily. Resend has generous free tier and excellent DX.",
+      "date": "2026-03-20"
+    },
+    {
+      "title": "Net worth snapshots: daily cron job",
+      "decision": "Background job at midnight snapshots all account balances into net_worth_snapshots table.",
+      "rationale": "Simple, predictable, low overhead. Daily granularity is sufficient for trend charts.",
+      "date": "2026-03-20"
+    },
+    {
+      "title": "Chart library: Nivo",
+      "decision": "Nivo for all Next.js data visualizations (charts, graphs, dashboards).",
+      "rationale": "Rich D3-based, best looking charts out of the box. Worth the bundle size for a dashboard-heavy finance app.",
+      "date": "2026-03-20"
+    },
+    {
+      "title": "Investment portfolio: manual prices, FIFO, simple return for v1",
+      "decision": "Manual price entry (market data API deferred to v2). FIFO-only cost basis. Simple return ((current-cost)/cost).",
+      "rationale": "Dramatically reduces scope. Manual prices are sufficient for tracking. FIFO covers 90% of investors. Simple return is easy to understand.",
+      "date": "2026-03-20"
+    },
+    {
+      "title": "Reports: full accounting suite, CSV export only",
+      "decision": "Balance sheet, income statement, trial balance, spending reports. CSV export. PDF/OFX deferred.",
+      "rationale": "Full accounting reports are native to double-entry (just query handlers). CSV is universal and trivial to implement.",
+      "date": "2026-03-20"
+    },
+    {
+      "title": "Household size cap: 10 members",
+      "decision": "Maximum 10 members per household. Enforced as domain invariant.",
+      "rationale": "Covers families and roommate groups. Prevents abuse. Can raise later.",
+      "date": "2026-03-20"
+    },
+    {
+      "title": "Account hierarchy: optional parent_id",
+      "decision": "Accounts have optional parent_id for sub-account grouping. UI shows tree view for power users.",
+      "rationale": "Enables 'Assets > Bank > Checking' style organization. parent_id is a single nullable column — minimal schema cost.",
+      "date": "2026-03-20"
+    },
+    {
+      "title": "Debt management: full suite, own bounded context",
+      "decision": "Debt context (internal/debt/) with Loan aggregate, amortization schedules, auto-split payments (principal vs interest), payoff strategies (snowball/avalanche/hybrid/custom), what-if scenarios, upcoming payments dashboard.",
+      "rationale": "Users need to see exactly how much they owe, when payments are due, and how to optimize payoff. Auto-split gives accurate interest tracking. All four strategies give maximum flexibility.",
+      "date": "2026-03-20"
+    },
+    {
+      "title": "Email provider: Resend",
+      "decision": "Resend for transactional email (invitations, budget alerts). React Email for templates.",
+      "rationale": "Modern API, generous free tier (100 emails/day), excellent DX, React Email for type-safe templates.",
+      "date": "2026-03-20"
+    }
+  ],
+  "nextShapeMoves": [],
+  "timestamp": "2026-03-20T00:00:00Z"
+}

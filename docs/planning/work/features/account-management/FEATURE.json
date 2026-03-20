@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "feature": "account-management",
+  "slug": "account-management",
+  "displayName": "Account Management (SUPERSEDED)",
+  "parentShape": {
+    "initiative": "personal-finance",
+    "path": "docs/planning/work/ideas/personal-finance/SHAPE.json",
+    "timestamp": "2026-03-20T00:00:00Z"
+  },
+  "userOutcome": "SUPERSEDED — see chart-of-accounts",
+  "scopeSummary": "SUPERSEDED by chart-of-accounts feature",
+  "dependencies": [],
+  "risks": [],
+  "status": "parked",
+  "readinessReason": "Superseded by chart-of-accounts which incorporates double-entry accounting, wallets, and household scope",
+  "handoffSummary": "See chart-of-accounts feature",
+  "timestamp": "2026-03-20T00:00:00Z"
+}

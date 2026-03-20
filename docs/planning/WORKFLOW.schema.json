@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "workflow.schema.json",
+  "title": "Universal Development Workflow Pack - WORKFLOW.json",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["version", "repoShape", "enforcement", "performance", "packages"],
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "repoShape": {
+      "type": "string",
+      "enum": ["auto", "single", "monorepo", "polyglot"]
+    },
+    "performance": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "postEditFormat": { "type": "string", "enum": ["auto", "off"] },
+        "postEditFormatScope": { "type": "string", "enum": ["changed", "repo"] },
+        "checkScope": { "type": "string", "enum": ["auto", "changed", "all"] },
+        "changedFilesFallback": { "type": "string", "enum": ["none", "head"] },
+        "commandTimeoutSec": { "type": "integer", "minimum": 1 },
+        "tokenBudgets": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "commandWordMax": { "type": "integer", "minimum": 1 },
+            "commandsTotalWordMax": { "type": "integer", "minimum": 1 },
+            "contextWordMax": { "type": "integer", "minimum": 1 },
+            "planWordMax": { "type": "integer", "minimum": 1 },
+            "summaryWordMax": { "type": "integer", "minimum": 1 },
+            "reviewWordMax": { "type": "integer", "minimum": 1 },
+            "researchWordMax": { "type": "integer", "minimum": 1 },
+            "shapeWordMax": { "type": "integer", "minimum": 1 },
+            "brainstormWordMax": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "outputCompaction": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "maxLines": { "type": "integer", "minimum": 1 },
+            "failTailLines": { "type": "integer", "minimum": 1 },
+            "passLines": { "type": "integer", "minimum": 1 },
+            "dedupe": { "type": "boolean" }
+          }
+        },
+        "outputRecovery": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "mode": { "type": "string", "enum": ["failures", "always", "never"] },
+            "minChars": { "type": "integer", "minimum": 1 },
+            "maxFiles": { "type": "integer", "minimum": 1 },
+            "maxFileSize": { "type": "integer", "minimum": 1 },
+            "directory": { "type": "string", "minLength": 1 }
+          }
+        },
+        "tokenTelemetry": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "enabled": { "type": "boolean" }
+          }
+        },
+        "hookOptimization": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "mode": { "type": "string", "enum": ["suggest", "enforce", "off"] },
+            "showSuggestions": { "type": "boolean" },
+            "logFile": { "type": "string", "minLength": 1 }
+          }
+        },
+        "bootstrapContext": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "rootClaudeWordMax": { "type": "integer", "minimum": 1 },
+            "workflowClaudeWordMax": { "type": "integer", "minimum": 1 },
+            "commandSetWordMax": { "type": "integer", "minimum": 1 }
+          }
+        }
+      }
+    },
+    "research": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "mode": { "type": "string", "enum": ["off", "local", "mcp", "web", "auto"] },
+        "minSources": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "enforcement": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "monorepoVerifyScope": { "type": "string", "enum": ["warn", "error"] },
+        "operatingPrinciples": { "type": "string", "enum": ["off", "warn", "error"] },
+        "tddMode": { "type": "string", "enum": ["off", "warn", "error"] },
+        "verificationBeforeCompletion": { "type": "string", "enum": ["off", "warn", "error"] },
+        "twoStageReview": { "type": "string", "enum": ["off", "warn", "error"] },
+        "taskOwnership": { "type": "string", "enum": ["off", "warn", "error"] }
+      }
+    },
+    "freshness": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "contextMaxAgeDays": { "type": "integer", "minimum": 0 },
+        "planMaxAgeDaysWithoutSummary": { "type": "integer", "minimum": 0 },
+        "summaryMaxAgeDaysWithoutReview": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "invariants": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "scanScope": { "type": "string", "enum": ["changed", "repo"] },
+        "maxFileLines": { "type": "integer", "minimum": 1 },
+        "maxFileLinesExceptions": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "maxLineLength": { "type": "integer", "minimum": 1 },
+        "todoRequiresTicket": { "type": "boolean" },
+        "pythonBareExcept": { "type": "string", "enum": ["off", "warn", "fail"] },
+        "forbiddenImportPatterns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": ["pattern"],
+            "properties": {
+              "pattern": { "type": "string", "minLength": 1 },
+              "mode": { "type": "string", "enum": ["substring", "regex"] },
+              "severity": { "type": "string", "enum": ["warn", "fail"] },
+              "message": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "entropy": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "mode": { "type": "string", "enum": ["background", "manual"] },
+        "maxFilesPerTask": { "type": "integer", "minimum": 1 },
+        "maxTasksPerRun": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "agentTeams": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "delegateMode": { "type": "boolean" },
+        "staleIndicatorMinutes": { "type": "integer", "minimum": 1 },
+        "maxTakeoversPerTask": { "type": "integer", "minimum": 0 },
+        "defaultCompositions": { "type": "object" }
+      }
+    },
+    "packages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["path"],
+        "properties": {
+          "name": { "type": "string" },
+          "path": { "type": "string", "minLength": 1 },
+          "kind": { "type": "string", "enum": ["node", "java", "python", "go", "rust", "other"] },
+          "commands": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "build": { "type": "string" },
+              "test": { "type": "string" },
+              "lint": { "type": "string" },
+              "format": { "type": "string" },
+              "typecheck": { "type": "string" },
+              "run": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

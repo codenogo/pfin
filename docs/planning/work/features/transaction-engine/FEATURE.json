@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "feature": "transaction-engine",
+  "slug": "transaction-engine",
+  "displayName": "Transaction Engine (SUPERSEDED)",
+  "parentShape": {
+    "initiative": "personal-finance",
+    "path": "docs/planning/work/ideas/personal-finance/SHAPE.json",
+    "timestamp": "2026-03-20T00:00:00Z"
+  },
+  "userOutcome": "SUPERSEDED — see double-entry-ledger",
+  "scopeSummary": "SUPERSEDED by double-entry-ledger feature",
+  "dependencies": [],
+  "risks": [],
+  "status": "parked",
+  "readinessReason": "Superseded by double-entry-ledger which implements full double-entry accounting with journal entries",
+  "handoffSummary": "See double-entry-ledger feature",
+  "timestamp": "2026-03-20T00:00:00Z"
+}

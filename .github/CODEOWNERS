@@ -1,0 +1,105 @@
+# CODEOWNERS
+#
+# This file defines code owners for different parts of the repository.
+# Code owners are automatically requested for review when someone opens
+# a pull request that modifies code that they own.
+#
+# Order matters: later patterns override earlier ones.
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# =============================================================================
+# DEFAULT OWNERS
+# =============================================================================
+# These owners will be requested for review on any file not matched by a
+# more specific pattern below.
+
+*                                   @default-owner
+
+# =============================================================================
+# DOCUMENTATION
+# =============================================================================
+
+*.md                                @docs-team
+/docs/                              @docs-team
+README.md                           @default-owner @docs-team
+
+# =============================================================================
+# CONFIGURATION
+# =============================================================================
+
+# CI/CD
+/.github/                           @platform-team
+/.github/workflows/                 @platform-team @security-team
+
+# Project config
+package.json                        @default-owner
+pom.xml                             @default-owner
+build.gradle                        @default-owner
+Dockerfile                          @platform-team
+docker-compose*.yml                 @platform-team
+
+# =============================================================================
+# SOURCE CODE
+# =============================================================================
+
+# Backend
+/src/main/                          @backend-team
+/src/services/                      @backend-team
+/src/api/                           @backend-team @api-owners
+
+# Frontend
+/src/components/                    @frontend-team
+/src/pages/                         @frontend-team
+/src/styles/                        @frontend-team
+
+# Shared
+/src/types/                         @backend-team @frontend-team
+/src/utils/                         @default-owner
+
+# =============================================================================
+# TESTS
+# =============================================================================
+
+/src/test/                          @backend-team
+/tests/                             @qa-team
+/__tests__/                         @frontend-team
+*.test.ts                           @qa-team
+*.spec.ts                           @qa-team
+
+# =============================================================================
+# SECURITY-SENSITIVE
+# =============================================================================
+# These paths require security team review.
+
+/src/**/auth/                       @security-team @backend-team
+/src/**/security/                   @security-team
+/src/**/crypto/                     @security-team
+**/permissions*                     @security-team
+**/rbac*                            @security-team
+
+# =============================================================================
+# DATABASE
+# =============================================================================
+
+/migrations/                        @database-team @backend-team
+/src/**/repositories/               @database-team @backend-team
+**/schema*                          @database-team
+
+# =============================================================================
+# INFRASTRUCTURE
+# =============================================================================
+
+/terraform/                         @platform-team
+/k8s/                               @platform-team
+/helm/                              @platform-team
+*.tf                                @platform-team
+
+# =============================================================================
+# PLANNING & WORKFLOW
+# =============================================================================
+# These files document decisions and don't need blocking reviews.
+
+/docs/planning/                     @default-owner
+/docs/adr/                          @default-owner
+.claude/                            @default-owner
+CLAUDE.md                           @default-owner

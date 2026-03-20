@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "feature": "reporting-analytics",
+  "slug": "reporting-analytics",
+  "displayName": "Reporting & Analytics (Reporting Context — Phase 2)",
+  "parentShape": {
+    "initiative": "personal-finance",
+    "path": "docs/planning/work/ideas/personal-finance/SHAPE.json",
+    "timestamp": "2026-03-20T00:00:00Z"
+  },
+  "userOutcome": "Users can generate balance sheets, income statements, trial balances, spending reports, and export to CSV",
+  "scopeSummary": "Reporting context phase 2 (internal/reporting/): full accounting reports (trial balance, balance sheet, income statement), spending by category, per-member household breakdowns, CSV export. All read-only query handlers.",
+  "dependencies": ["double-entry-ledger", "budget-system"],
+  "risks": [
+    "Report generation performance at scale",
+    "Household per-member breakdowns",
+    "Balance sheet correctness depends on account categorization"
+  ],
+  "status": "discuss-ready",
+  "readinessReason": "All blocking decisions resolved: full accounting reports, CSV export only. Reports are native to double-entry.",
+  "handoffSummary": "Implement reporting query handlers: TrialBalance, BalanceSheet, IncomeStatement, SpendingByCategory. CSV export via encoding/csv. Per-member breakdown. Next.js report pages with Nivo charts.",
+  "timestamp": "2026-03-20T00:00:00Z"
+}

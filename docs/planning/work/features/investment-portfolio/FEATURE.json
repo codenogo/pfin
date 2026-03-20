@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "feature": "investment-portfolio",
+  "slug": "investment-portfolio",
+  "displayName": "Investment Portfolio Tracker (Portfolio Context)",
+  "parentShape": {
+    "initiative": "personal-finance",
+    "path": "docs/planning/work/ideas/personal-finance/SHAPE.json",
+    "timestamp": "2026-03-20T00:00:00Z"
+  },
+  "userOutcome": "Users can track holdings with manual price entry, see simple return performance, asset allocation, and dividend income — FIFO cost basis",
+  "scopeSummary": "Portfolio context (internal/portfolio/): holdings as journal entries, manual price entry (market API deferred), FIFO cost basis per lot, simple return, Nivo allocation pie chart, dividend tracking, dual-scope",
+  "dependencies": ["double-entry-ledger"],
+  "risks": [
+    "FIFO lot matching correctness",
+    "Manual price entry UX",
+    "Performance calculation edge cases"
+  ],
+  "status": "discuss-ready",
+  "readinessReason": "All blocking decisions resolved: manual prices, FIFO only, simple return. Scope significantly reduced.",
+  "handoffSummary": "Implement internal/portfolio/: Holdings as journal entries on investment accounts. FIFO lot tracking. Manual price update. Simple return query. Nivo allocation chart. Dividend as income entries.",
+  "timestamp": "2026-03-20T00:00:00Z"
+}

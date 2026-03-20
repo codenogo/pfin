@@ -1,0 +1,17 @@
+# Graph module dependencies
+# Install with: pip install -r .cnogo/requirements-graph.txt
+# Skip in minimal/CI installs with: ./install.sh --skip-graph
+
+tree-sitter>=0.23
+tree-sitter-python>=0.23
+tree-sitter-typescript>=0.23
+tree-sitter-javascript>=0.23
+tree-sitter-go>=0.23
+tree-sitter-rust>=0.23
+tree-sitter-java>=0.23
+kuzu>=0.8
+igraph>=0.11
+leidenalg>=0.10
+sentence-transformers>=3.0
+watchfiles>=1.0
+rank-bm25>=0.2
