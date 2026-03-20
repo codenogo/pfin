@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "feature": "auth-user-management",
+  "planNumber": 2,
+  "goal": "Implement application services (CQRS commands) and infrastructure adapters: Register, Authenticate, Refresh, Logout command handlers. JWT token issuer. PostgreSQL repositories for users and sessions. Domain event emission (UserRegistered).",
+  "tasks": [
+    {
+      "id": 0,
+      "name": "JWT token issuer + PostgreSQL repositories",
+      "action": "Implement the infrastructure adapters: JWT issuer (golang-jwt HS256, signs access tokens with user claims), PostgreSQL user repository, and PostgreSQL session repository. All implement domain interfaces.",
+      "files": [
+        "internal/identity/adapters/jwt_issuer.go",
+        "internal/identity/adapters/jwt_issuer_test.go",
+        "internal/identity/adapters/postgres_user_repo.go",
+        "internal/identity/adapters/postgres_session_repo.go"
+      ],
+      "verify": [
+        "go test ./internal/identity/adapters/... -v -run TestJWT"
+      ],
+      "microSteps": [
+        "Implement jwt_issuer.go: TokenIssuer struct with secret []byte and accessTTL duration. IssueAccessToken(userID, email) (string, error) — creates JWT with sub, email, iat, exp claims using HS256. ValidateAccessToken(tokenStr) (*Claims, error) — parses and validates, returns Claims{UserID, Email}.",
+        "Write jwt_issuer_test.go: test sign + verify round-trip, expired token rejection, tampered token rejection",
+        "Implement postgres_user_repo.go: implements UserRepository — Create (INSERT RETURNING), GetByID (SELECT by id), GetByEmail (SELECT by email), Update (UPDATE SET)",
+        "Implement postgres_session_repo.go: implements SessionRepository — Create (INSERT), GetByTokenHash (SELECT WHERE NOT revoked AND expires_at > now()), RevokeByID (UPDATE SET revoked=true), RevokeAllForUser (UPDATE SET revoked=true WHERE user_id)"
+      ],
+      "tdd": {
+        "required": true,
+        "failingFirst": "go test ./internal/identity/adapters/... -run TestJWT should fail",
+        "passingAfter": "go test ./internal/identity/adapters/... -v -run TestJWT should pass"
+      },
+      "blockedBy": []
+    },
+    {
+      "id": 1,
+      "name": "Command handlers (Register, Authenticate, Refresh, Logout)",
+      "action": "Implement the CQRS command handlers in internal/identity/app/command/. Each handler orchestrates domain objects and repositories. Register emits UserRegistered domain event via the event bus.",
+      "files": [
+        "internal/identity/app/command/register.go",
+        "internal/identity/app/command/register_test.go",
+        "internal/identity/app/command/authenticate.go",
+        "internal/identity/app/command/authenticate_test.go",
+        "internal/identity/app/command/refresh.go",
+        "internal/identity/app/command/logout.go",
+        "internal/identity/domain/user/events.go"
+      ],
+      "verify": [
+        "go test ./internal/identity/app/command/... -v"
+      ],
+      "microSteps": [
+        "Implement events.go in domain/user: UserRegistered event struct (UserID, Email, Timestamp) implementing event.Event interface",
+        "Implement register.go: RegisterHandler with UserRepository, EventPublisher deps. Handle(ctx, RegisterCmd{Email, Password, DisplayName}) → validate password, check email uniqueness, hash password, create User, emit UserRegistered",
+        "Write register_test.go: test successful registration, duplicate email conflict, invalid password rejection. Use mock repos (interfaces).",
+        "Implement authenticate.go: AuthenticateHandler with UserRepository, SessionRepository, TokenIssuer. Handle(ctx, AuthCmd{Email, Password}) → find user by email, verify password, generate refresh token, issue access token, return token pair",
+        "Write authenticate_test.go: test successful login, wrong password, user not found",
+        "Implement refresh.go: RefreshHandler with SessionRepository, UserRepository, TokenIssuer. Handle(ctx, RefreshCmd{RawToken}) → hash token, find session, check expiry, revoke old, create new refresh token, issue new access token (token rotation)",
+        "Implement logout.go: LogoutHandler with SessionRepository. Handle(ctx, LogoutCmd{RawToken}) → hash token, revoke session"
+      ],
+      "tdd": {
+        "required": true,
+        "failingFirst": "go test ./internal/identity/app/command/... should fail",
+        "passingAfter": "go test ./internal/identity/app/command/... -v should pass"
+      },
+      "blockedBy": [0]
+    },
+    {
+      "id": 2,
+      "name": "Service wiring",
+      "action": "Create the Identity service factory that wires all dependencies together. Takes pgx pool, event publisher, and config — returns a fully assembled application with all command handlers.",
+      "files": [
+        "internal/identity/service/wire.go"
+      ],
+      "verify": [
+        "go build ./internal/identity/..."
+      ],
+      "microSteps": [
+        "Implement wire.go: Application struct holding all command handlers. NewApplication(pool *pgxpool.Pool, publisher event.Publisher, jwtSecret string, accessTTL, refreshTTL time.Duration) *Application — constructs repos, token issuer, and handlers"
+      ],
+      "tdd": {
+        "required": false,
+        "reason": "Pure wiring code. Verified by successful compilation."
+      },
+      "blockedBy": [1]
+    }
+  ],
+  "planVerify": [
+    "go test ./internal/identity/... -v",
+    "go build ./internal/identity/...",
+    "go vet ./internal/identity/..."
+  ],
+  "commitMessage": "feat(identity): application layer — command handlers, JWT issuer, PostgreSQL repos, UserRegistered event",
+  "timestamp": "2026-03-20T00:00:00Z"
+}

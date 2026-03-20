@@ -11,11 +11,15 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/codenogo/pfin/internal/common/auth"
 	"github.com/codenogo/pfin/internal/common/event"
 	"github.com/codenogo/pfin/internal/common/server"
 	"github.com/codenogo/pfin/internal/config"
+	identityPorts "github.com/codenogo/pfin/internal/identity/ports"
+	identityService "github.com/codenogo/pfin/internal/identity/service"
 )
 
 func main() {
@@ -60,13 +64,33 @@ func run() error {
 	publisher := event.NewCompositePublisher(syncBus, asyncBus)
 	defer publisher.Close()
 
-	// Suppress unused variable warning — publisher will be used by bounded context services
-	_ = publisher
+	// ── Identity Context ──
+	accessTTL := 15 * time.Minute
+	refreshTTL := 14 * 24 * time.Hour
+	identityApp := identityService.NewApplication(pool, publisher, cfg.JWTSecret, accessTTL, refreshTTL)
+
+	authHandler := identityPorts.NewAuthHandler(
+		identityApp.Register, identityApp.Authenticate,
+		identityApp.Refresh, identityApp.Logout, refreshTTL,
+	)
+	userHandler := identityPorts.NewUserHandler(
+		identityApp.UserRepo(),
+	)
+
+	// JWT validator function for middleware
+	tokenIssuer := identityApp.TokenIssuer()
+	jwtValidator := auth.TokenValidator(func(tokenStr string) (uuid.UUID, string, error) {
+		claims, err := tokenIssuer.ValidateAccessToken(tokenStr)
+		if err != nil {
+			return uuid.Nil, "", err
+		}
+		return claims.UserID, claims.Email, nil
+	})
 
 	// Build router
 	r := chi.NewRouter()
 
-	// Middleware chain
+	// Global middleware
 	r.Use(server.RequestID)
 	r.Use(server.StructuredLogger)
 	r.Use(server.Recovery)
@@ -74,6 +98,15 @@ func run() error {
 
 	// Health endpoint
 	r.Get("/health", server.HealthHandler(pool))
+
+	// Public auth routes
+	r.Mount("/auth", authHandler.Routes())
+
+	// Protected routes (JWT required)
+	r.Group(func(r chi.Router) {
+		r.Use(auth.JWTMiddleware(jwtValidator))
+		r.Mount("/users", userHandler.Routes())
+	})
 
 	// Start server
 	srv := &http.Server{
