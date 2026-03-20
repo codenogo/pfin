@@ -63,7 +63,48 @@
     "scanScope": "changed",
     "todoRequiresTicket": true
   },
-  "packages": [],
+  "packages": [
+    {
+      "commands": {
+        "format": "gofmt -w .",
+        "lint": "go vet ./...",
+        "test": "go test ./... -short"
+      },
+      "kind": "go",
+      "name": "pfin",
+      "path": "."
+    },
+    {
+      "commands": {
+        "format": "python3 -m black . && python3 -m isort .",
+        "lint": "ruff check .",
+        "test": "pytest -q --tb=short"
+      },
+      "kind": "python",
+      "name": "cython",
+      "path": ".cnogo/.venv/lib/python3.14/site-packages/numpy/_core/tests/examples/cython"
+    },
+    {
+      "commands": {
+        "format": "python3 -m black . && python3 -m isort .",
+        "lint": "ruff check .",
+        "test": "pytest -q --tb=short"
+      },
+      "kind": "python",
+      "name": "limited_api",
+      "path": ".cnogo/.venv/lib/python3.14/site-packages/numpy/_core/tests/examples/limited_api"
+    },
+    {
+      "commands": {
+        "format": "python3 -m black . && python3 -m isort .",
+        "lint": "ruff check .",
+        "test": "pytest -q --tb=short"
+      },
+      "kind": "python",
+      "name": "f2py",
+      "path": ".cnogo/.venv/lib/python3.14/site-packages/numpy/f2py"
+    }
+  ],
   "performance": {
     "bootstrapContext": {
       "commandSetWordMax": 7000,

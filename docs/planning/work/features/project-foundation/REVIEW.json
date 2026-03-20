@@ -1,0 +1,261 @@
+{
+  "automated": [
+    {
+      "name": "lint",
+      "result": "pass"
+    },
+    {
+      "name": "types",
+      "result": "skipped"
+    },
+    {
+      "name": "tests",
+      "result": "pass"
+    }
+  ],
+  "blockers": [],
+  "branch": "feature/project-foundation",
+  "feature": "project-foundation",
+  "impactAnalysis": {
+    "affected_files": [],
+    "affected_symbols": [],
+    "enabled": true,
+    "graph_status": "indexed",
+    "per_file": {
+      ".cnogo/issues.jsonl": [],
+      ".cnogo/scripts/__pycache__/workflow_checks_core.cpython-314.pyc": [],
+      ".cnogo/scripts/context/__pycache__/embeddings.cpython-314.pyc": [],
+      ".cnogo/scripts/context/__pycache__/search.cpython-314.pyc": [],
+      ".cnogo/scripts/memory/__pycache__/context.cpython-314.pyc": [],
+      ".cnogo/scripts/memory/__pycache__/sync.cpython-314.pyc": [],
+      "docs/planning/WORKFLOW.json": []
+    },
+    "total_affected": 0
+  },
+  "invariants": {
+    "findings": [],
+    "summary": {
+      "fail": 0,
+      "total": 0,
+      "warn": 0
+    }
+  },
+  "packages": [
+    {
+      "checks": [
+        {
+          "cmd": "go vet ./...",
+          "cwd": ".",
+          "exitCode": 0,
+          "fullOutputPath": null,
+          "name": "lint",
+          "output": "",
+          "outputReducer": "empty",
+          "reason": null,
+          "result": "pass",
+          "tokenTelemetry": {
+            "inputTokens": 0,
+            "outputTokens": 0,
+            "savedTokens": 0,
+            "savingsPct": 0.0
+          }
+        },
+        {
+          "cmd": null,
+          "name": "typecheck",
+          "result": "skipped"
+        },
+        {
+          "cmd": "go test ./... -short",
+          "cwd": ".",
+          "exitCode": 0,
+          "fullOutputPath": null,
+          "name": "test",
+          "output": "OUTPUT (tail):\n?   \tgithub.com/codenogo/pfin/cmd/api\t[no test files]\nok  \tgithub.com/codenogo/pfin/internal/common/event\t0.654s\nok  \tgithub.com/codenogo/pfin/internal/common/server\t0.931s\n?   \tgithub.com/codenogo/pfin/internal/config\t[no test files]\nok  \tgithub.com/codenogo/pfin/pkg/currency\t0.732s\nok  \tgithub.com/codenogo/pfin/pkg/errs\t1.219s\nok  \tgithub.com/codenogo/pfin/pkg/money\t1.601s\nok  \tgithub.com/codenogo/pfin/pkg/scope\t1.890s",
+          "outputReducer": "failure-focus",
+          "reason": null,
+          "result": "pass",
+          "tokenTelemetry": {
+            "inputTokens": 106,
+            "outputTokens": 109,
+            "savedTokens": 0,
+            "savingsPct": 0.0
+          }
+        }
+      ],
+      "kind": "go",
+      "name": "pfin",
+      "path": "."
+    },
+    {
+      "checks": [
+        {
+          "cmd": "ruff check .",
+          "name": "lint",
+          "reason": "no changed files for package",
+          "result": "skipped"
+        },
+        {
+          "cmd": null,
+          "name": "typecheck",
+          "result": "skipped"
+        },
+        {
+          "cmd": "pytest -q --tb=short",
+          "name": "test",
+          "reason": "no changed files for package",
+          "result": "skipped"
+        }
+      ],
+      "kind": "python",
+      "name": "cython",
+      "path": ".cnogo/.venv/lib/python3.14/site-packages/numpy/_core/tests/examples/cython"
+    },
+    {
+      "checks": [
+        {
+          "cmd": "ruff check .",
+          "name": "lint",
+          "reason": "no changed files for package",
+          "result": "skipped"
+        },
+        {
+          "cmd": null,
+          "name": "typecheck",
+          "result": "skipped"
+        },
+        {
+          "cmd": "pytest -q --tb=short",
+          "name": "test",
+          "reason": "no changed files for package",
+          "result": "skipped"
+        }
+      ],
+      "kind": "python",
+      "name": "limited_api",
+      "path": ".cnogo/.venv/lib/python3.14/site-packages/numpy/_core/tests/examples/limited_api"
+    },
+    {
+      "checks": [
+        {
+          "cmd": "ruff check .",
+          "name": "lint",
+          "reason": "no changed files for package",
+          "result": "skipped"
+        },
+        {
+          "cmd": null,
+          "name": "typecheck",
+          "result": "skipped"
+        },
+        {
+          "cmd": "pytest -q --tb=short",
+          "name": "test",
+          "reason": "no changed files for package",
+          "result": "skipped"
+        }
+      ],
+      "kind": "python",
+      "name": "f2py",
+      "path": ".cnogo/.venv/lib/python3.14/site-packages/numpy/f2py"
+    }
+  ],
+  "patternCompliance": [],
+  "performanceFindings": [],
+  "principleNotes": [],
+  "schemaVersion": 4,
+  "securityFindings": [],
+  "stageReviews": [
+    {
+      "stage": "spec-compliance",
+      "status": "pass",
+      "findings": [],
+      "evidence": [
+        "All 3 plans implemented: scaffold, shared kernel, infrastructure",
+        "DDD directory structure matches CONTEXT.json decisions (8 bounded contexts)",
+        "go.mod: github.com/codenogo/pfin with go 1.26 — matches PF-001/PF-002",
+        "Docker Compose uses postgres:18 — matches PF-003",
+        "Health endpoint at GET /health — matches PF-004",
+        "Shared kernel: Money, Currency, Scope, DomainError — matches PF-005",
+        "Event bus: sync + async + composite — matches PF-006",
+        "chi v5 router with middleware chain — matches PF-007",
+        "pgx v5 connection pool — matches PF-008",
+        "Migrations: pgcrypto, pg_trgm, event_outbox — matches PF-015",
+        "All tests pass (7 packages), go vet clean, build succeeds"
+      ],
+      "notes": "All 15 CONTEXT.json decisions implemented correctly. Scope matches plan goals exactly. No changed-scope violations."
+    },
+    {
+      "stage": "code-quality",
+      "status": "pass",
+      "findings": [
+        {
+          "severity": "info",
+          "file": "cmd/api/main.go:64",
+          "finding": "_ = publisher suppresses unused variable. Expected — publisher will be consumed by bounded context services in next features.",
+          "action": "none"
+        },
+        {
+          "severity": "info",
+          "file": "internal/common/server/health.go:14",
+          "finding": "var startTime = time.Now() is a package-level mutable. Acceptable for uptime tracking — only read after init.",
+          "action": "none"
+        }
+      ],
+      "evidence": [
+        "Value objects (Money, Currency, Scope) are immutable — unexported fields, value receivers, no mutation methods",
+        "DomainError supports errors.Is/As via Unwrap() — standard Go error wrapping",
+        "Event bus is race-safe (tested with -race flag)",
+        "AsyncBus.Close() properly drains queue before returning",
+        "Middleware chain follows correct order: RequestID → Logger → Recovery → CORS",
+        "Health handler uses DBPinger interface — testable without real DB",
+        "Graceful shutdown handles SIGINT/SIGTERM with 10s timeout",
+        "No secrets in code — config from env vars with .env.example",
+        "No ORM — raw pgx as decided",
+        "go.sum locked — reproducible builds"
+      ],
+      "notes": "Clean, idiomatic Go. Good interface usage. Proper concurrency patterns. No security concerns."
+    }
+  ],
+  "securityFindings": [
+    {
+      "severity": "info",
+      "finding": "No secrets in code. JWT_SECRET loaded from env. .env in .gitignore.",
+      "action": "none"
+    }
+  ],
+  "performanceFindings": [],
+  "patternCompliance": [
+    {
+      "pattern": "Clean architecture dependency rule",
+      "status": "compliant",
+      "notes": "Domain (pkg/) has zero framework deps. Infrastructure imports domain, not vice versa."
+    },
+    {
+      "pattern": "Constructor injection",
+      "status": "compliant",
+      "notes": "HealthHandler(db DBPinger) — accepts interface. CompositePublisher via NewCompositePublisher."
+    },
+    {
+      "pattern": "Event-driven architecture",
+      "status": "compliant",
+      "notes": "Sync+async bus with CompositePublisher pattern. Events are interfaces, handlers are functions."
+    }
+  ],
+  "principleNotes": [
+    "Simplicity First: minimal scaffold, no over-engineering",
+    "Surgical Changes: only foundation code, no domain logic yet",
+    "TDD: shared kernel and event bus fully test-driven"
+  ],
+  "timestamp": "2026-03-20T03:02:38Z",
+  "tokenTelemetry": {
+    "checksRun": 2,
+    "checksSkipped": 10,
+    "inputTokens": 106,
+    "outputTokens": 109,
+    "savedTokens": 0,
+    "savingsPct": 0.0
+  },
+  "verdict": "pass",
+  "warnings": []
+}
