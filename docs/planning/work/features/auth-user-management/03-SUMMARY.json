@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "feature": "auth-user-management",
+  "planNumber": 3,
+  "outcome": "complete",
+  "changes": [
+    "internal/common/auth/ — JWT middleware (TokenValidator func type), UserContext, context helpers with tests",
+    "internal/identity/ports/auth_handler.go — POST /auth/register, /login, /refresh (cookie), /logout",
+    "internal/identity/ports/user_handler.go — GET /users/me, PATCH /users/me",
+    "cmd/api/main.go — wired Identity context, auth/user routes, JWT middleware on protected group"
+  ],
+  "verification": [
+    {"command": "go test ./internal/common/auth/... -v", "result": "pass"},
+    {"command": "go build -o bin/pfin ./cmd/api/...", "result": "pass"},
+    {"command": "go vet ./...", "result": "pass"}
+  ],
+  "commit": "4baf444",
+  "timestamp": "2026-03-20T00:00:00Z"
+}

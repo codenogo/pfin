@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "feature": "auth-user-management",
+  "planNumber": 1,
+  "outcome": "complete",
+  "changes": [
+    "internal/identity/domain/user/ — User aggregate, Credentials (bcrypt), repository interface",
+    "internal/identity/domain/session/ — RefreshToken entity, token generation + hashing, repository interface",
+    "migrations/003_users — users table with email unique index",
+    "migrations/004_refresh_tokens — refresh_tokens table with partial index"
+  ],
+  "verification": [
+    {"command": "go test ./internal/identity/domain/user/... -v", "result": "pass"},
+    {"command": "go test ./internal/identity/domain/session/... -v", "result": "pass"},
+    {"command": "migrations exist", "result": "pass"}
+  ],
+  "commit": "4baf444",
+  "timestamp": "2026-03-20T00:00:00Z"
+}
